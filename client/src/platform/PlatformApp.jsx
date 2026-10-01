@@ -25,7 +25,7 @@ import { Loader2 } from "lucide-react";
 const THEME_KEY = "dunzo.platform.theme";
 
 function PlatformShell() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem(THEME_KEY) || "dark"; } catch { return "dark"; }
   });
@@ -70,6 +70,7 @@ function PlatformShell() {
           onOpenMenu={() => setMenuOpen(true)}
           onOpenCopilot={() => setCopilotOpen(true)}
           onLogout={logout}
+          userName={user?.name || ""}
         />
         <main id="p-main" className="flex-1">
           <div className="mx-auto w-full max-w-[1200px] px-5 py-8 md:px-8 md:py-10">

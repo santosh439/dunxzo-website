@@ -10,6 +10,8 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     (async () => {
+      const token = (() => { try { return localStorage.getItem("dunzo.platform.token"); } catch { return null; } })();
+      if (!token) { setUser(false); setReady(true); return; }
       try {
         const { user } = await apiFetch("/auth/me");
         setUser(user);

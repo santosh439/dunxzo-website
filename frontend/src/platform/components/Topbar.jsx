@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Search, Bell, Sun, Moon, Menu, PanelLeftClose, PanelLeftOpen, ChevronDown, Sparkles, LogOut } from "lucide-react";
+import { useWorkspace } from "../context/WorkspaceContext.jsx";
 
-export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollapse, onOpenMobile, onOpenMenu, onOpenCopilot, onLogout }) {
+export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollapse, onOpenMobile, onOpenMenu, onOpenCopilot, onLogout, userName }) {
   const searchRef = useRef(null);
   const [userMenu, setUserMenu] = useState(false);
+  const { data } = useWorkspace();
+  const company = data?.profile?.company || "Workspace";
+  const initials = (userName || "DU").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
   useEffect(() => {
     const onKey = (e) => {
@@ -60,7 +64,7 @@ export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollap
             className="hidden items-center gap-2 rounded-full border border-p-edge/10 bg-p-ink/5 py-2 pl-3.5 pr-2.5 text-sm font-medium text-p-mute transition hover:text-p-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua md:flex"
           >
             <span className="h-2 w-2 rounded-full bg-p-aqua" />
-            Demo Organization
+            {company}
             <ChevronDown className="h-3.5 w-3.5 text-p-faint" />
           </button>
           <button
@@ -83,7 +87,7 @@ export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollap
               className="ml-1 grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua"
               style={{ background: "var(--p-grad)" }}
             >
-              DU
+              {initials}
             </button>
             {userMenu && (
               <>

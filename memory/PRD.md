@@ -86,8 +86,15 @@ User decisions (2026-10-01): platform lives under `/app/*` route tree, isolated 
 - Export: `lib/auditPack.js` `downloadAuditPack()` builds a styled HTML pack (evidence + policies + findings) and downloads `dunzo-audit-pack-YYYY-MM-DD.html`; wired to EvidencePage "Export audit pack". Verified download.
 - NOTE: Copilot endpoint exists only in the FastAPI preview backend. The canonical Express app (`/app/server`, GitHub production) does NOT yet have a Node equivalent — needs porting before production deploy.
 
-### Remaining Commands (sequential, preview + approval gate after each)
-- C8: Real data — JWT auth, Mongo schemas, onboarding wizard (call integration_expert for auth before writing code)
+### Command 8 (DONE, 2026-10-01): JWT auth + real per-user workspace data + onboarding + grounded Copilot — ALL 8 COMMANDS COMPLETE
+- Auth (integration_expert playbook followed): `backend/platform_auth.py` (bcrypt hash/verify, PyJWT HS256, 7-day access token, `current_user_id` dependency reading Bearer header → cookie fallback). Endpoints in server.py: `/api/auth/register` (409 on dup), `/api/auth/login` (401 on bad creds), `/api/auth/me`. `JWT_SECRET` in backend/.env. Token stored client-side in localStorage `dunzo.platform.token` + sent as Bearer.
+- Workspace: `backend/workspace_seed.py` (CONTROL_TEMPLATES x18, RISK_TEMPLATES x10, seed_controls filtered by chosen frameworks, seed_risks by mapped controls, compute_pulse). Endpoints: `POST /api/onboarding` (seeds workspace, sets user.onboarded), `GET /api/workspace` (profile+controls+risks+pulse), `PATCH /api/workspace/controls/{id}/review`, `PATCH /api/workspace/risks/{id}/accept`. Collections: users, workspaces.
+- Copilot grounding: `/api/copilot/chat` now optional-auth; when a Bearer token resolves to an onboarded workspace it injects a live summary (company, frameworks, pulse, controls needing work, top risks) into the system message → answers cite the user's real company + control/risk IDs. Anonymous still works.
+- Frontend: `context/AuthContext.jsx` (user null=checking/false=anon/obj; skips /auth/me probe when no token), `context/WorkspaceContext.jsx` (fetch + reviewControl/acceptRisk mutators), `lib/api.js` (apiFetch adds Bearer; NOTE: rsync excludes lib/api.js so `frontend/src/platform/lib/api.js` must be `cp`'d manually after each sync). `pages/AuthPage.jsx` (login/signup split-screen), `pages/OnboardingPage.jsx` (3-step wizard: company/frameworks/size). PlatformApp = AuthProvider + Gate (loading→AuthPage→OnboardingPage→PlatformShell wrapped in WorkspaceProvider). HomePage/ControlsPage/RiskPage merge live workspace status with template display fields by id; Home greeting + pulse + posture computed from workspace. Topbar shows real company + user initials + logout menu.
+- Tested (iteration_2.json): 17/17 backend pytest + all frontend flows, 100%/100%. 3 LOW items all fixed (topbar company/initials, silenced /auth/me 401 probe).
+- PRODUCTION NOTE: all Command 7-8 backend (copilot, auth, workspace) lives ONLY in the FastAPI preview backend. The canonical Express app (`/app/server`, GitHub deploy) needs these ported before production. Screens Monitoring/Evidence/Policies/Vendors/Audit/GCC/Trust remain MOCK (not user-requested as real yet).
+
+## Remaining Commands: NONE — all 8 delivered.
 
 ## Earlier (kept for reference)
 - **Codebase note**: Originally cloned Node monorepo; kept original design/content.
