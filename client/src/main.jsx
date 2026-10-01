@@ -1,0 +1,18 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, HashRouter } from "react-router-dom";
+import { MotionConfig } from "framer-motion";
+import App from "./App.jsx";
+import "./index.css";
+
+const Router = import.meta.env.VITE_ROUTER === "hash" ? HashRouter : BrowserRouter;
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <MotionConfig reducedMotion="user">
+      <Router>
+        <App />
+      </Router>
+    </MotionConfig>
+  </React.StrictMode>
+);
