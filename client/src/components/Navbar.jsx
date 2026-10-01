@@ -7,6 +7,25 @@ import Icon from "./Icon.jsx";
 import { NAV, mailto } from "../content/site.js";
 
 function MenuPanel({ item, close }) {
+  if (item.variant === "services") {
+    return (
+      <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+        {item.columns.map((col) => (
+          <div key={col.title}>
+            <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-mute">{col.title}</p>
+            <div className="grid gap-0.5">
+              {col.items.map((l) => (
+                <Link key={l.to} to={l.to} onClick={close} className="focus-ring group flex items-center gap-3 rounded-xl px-3 py-2 transition hover:bg-white/[0.05]">
+                  {l.icon && <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-violet-soft transition group-hover:bg-gradient-to-br group-hover:from-violet group-hover:to-aqua group-hover:text-void"><Icon name={l.icon} size={15} /></span>}
+                  <span className="text-sm font-medium leading-snug">{l.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
   if (item.columns) {
     return (
       <div className="grid gap-8 md:grid-cols-2">
@@ -120,7 +139,14 @@ export default function Navbar() {
                   </button>
                   {mobileSection === n.label && (
                     <div className="grid gap-1 pb-4">
-                      {(n.items || n.columns.flatMap((c) => c.items)).map((l) => <Link key={l.to} to={l.to} className="rounded-lg px-3 py-2.5 text-mute hover:bg-white/5 hover:text-ink">{l.label}</Link>)}
+                      {n.columns
+                        ? n.columns.map((c) => (
+                            <div key={c.title}>
+                              <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-mute/70">{c.title}</p>
+                              {c.items.map((l) => <Link key={l.to} to={l.to} className="block rounded-lg px-3 py-2.5 text-mute hover:bg-white/5 hover:text-ink">{l.label}</Link>)}
+                            </div>
+                          ))
+                        : n.items.map((l) => <Link key={l.to} to={l.to} className="rounded-lg px-3 py-2.5 text-mute hover:bg-white/5 hover:text-ink">{l.label}</Link>)}
                     </div>
                   )}
                 </div>

@@ -3,10 +3,15 @@ import { Mail, Globe2 } from "lucide-react";
 import { Logo } from "./ui.jsx";
 import { BRAND, FRAMEWORKS, SOLUTIONS, SERVICES, mailto } from "../content/site.js";
 
+const svcLinks = (cat, n, all) =>
+  SERVICES.filter((s) => s.category === cat).slice(0, n).map((s) => [s.name, `/services/${s.slug}`]).concat([all]);
+
 const cols = [
   ["Solutions", SOLUTIONS.map((s) => [s.name, `/solutions/${s.slug}`])],
   ["Compliance", FRAMEWORKS.slice(0, 8).map((f) => [f.code, `/compliance/${f.slug}`]).concat([["All frameworks", "/compliance"]])],
-  ["Services", SERVICES.slice(0, 7).map((s) => [s.name, `/services/${s.slug}`]).concat([["All services", "/services"]])],
+  ["Compliance and GRC", svcLinks("Compliance and GRC", 6, ["All services", "/services"])],
+  ["Cybersecurity", svcLinks("Cybersecurity", 5, ["All cybersecurity services", "/services#cybersecurity"])],
+  ["IT Infrastructure", svcLinks("IT Infrastructure", 5, ["All IT infrastructure services", "/services#it-infrastructure"])],
   ["Resources", [["Free Tools", "/tools"], ["Startup Compliance Hub", "/resources/startup-hub"], ["GCC Compliance Hub", "/resources/gcc-hub"], ["Guides and Blog", "/resources/guides"], ["Checklists", "/resources/checklists"], ["Glossary", "/resources/glossary"], ["Trust Center", "/trust-center"]]],
   ["Company", [["About DU-NZO", "/company/about"], ["Experts", "/company/experts"], ["Partners", "/company/partners"], ["Platform", "/platform"], ["Contact", "/contact"]]],
 ];
@@ -24,7 +29,7 @@ export default function Footer() {
             <a href={BRAND.url} className="flex items-center gap-2 text-ink/90 hover:text-aqua"><Globe2 size={16} className="text-aqua" />{BRAND.domain}</a>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-8 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-8 lg:grid-cols-4">
           {cols.map(([h, items]) => (
             <div key={h}>
               <p className="mb-4 text-sm font-semibold">{h}</p>

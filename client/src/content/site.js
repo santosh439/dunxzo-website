@@ -30,7 +30,7 @@ export const FRAMEWORKS = [
     issuer: "ISO and IEC", assessor: "Accredited certification body", output: "Certificate", cycle: "3 year certificate with annual surveillance audits", region: "Global",
     structure: ["Clauses 4 to 10 define the management system", "Annex A lists 93 controls in 4 themes: Organisational 37, People 8, Physical 14, Technological 34", "Statement of Applicability justifies which controls apply"],
     evidence: ["ISMS scope", "Information security policy", "Risk assessment and treatment plan", "Statement of Applicability", "Internal audit report", "Management review minutes", "Operational records for applicable controls"],
-    services: ["gap-assessment", "iso-readiness", "isms-implementation", "risk-assessment", "internal-audit", "audit-preparation"],
+    services: ["gap-assessment", "iso-readiness", "isms-implementation", "risk-assessment", "internal-audit", "audit-preparation", "vapt", "cloud-security-assessment", "soc-monitoring", "incident-response", "iam", "security-awareness-training"],
     tool: "iso-27001",
   },
   {
@@ -63,7 +63,7 @@ export const FRAMEWORKS = [
     issuer: "ISO", assessor: "Accredited certification body", output: "Certificate", cycle: "3 year certificate with annual surveillance audits", region: "Global",
     structure: ["Business impact analysis", "Risk assessment for disruption", "Business continuity strategies and plans", "Exercising and testing"],
     evidence: ["BCMS scope", "Business impact analysis", "Continuity plans", "Exercise reports", "Management review"],
-    services: ["bcp-dr", "risk-assessment", "internal-audit"],
+    services: ["bcp-dr", "risk-assessment", "internal-audit", "backup-disaster-recovery"],
   },
   {
     slug: "iso-42001", code: "ISO/IEC 42001", name: "ISO/IEC 42001:2023", type: "certification", family: "ISO",
@@ -84,7 +84,7 @@ export const FRAMEWORKS = [
     issuer: "AICPA", assessor: "Licensed CPA firm", output: "Type I or Type II report", cycle: "Type II covers an observation period, usually renewed annually", region: "Primarily North America, recognised globally",
     structure: ["Security (common criteria) is always included", "Optional: Availability, Processing Integrity, Confidentiality, Privacy", "Type I tests design at a point in time", "Type II tests operating effectiveness over a period"],
     evidence: ["System description", "Control matrix mapped to criteria", "Access reviews", "Change management records", "Vendor reviews", "Incident records"],
-    services: ["gap-assessment", "audit-preparation", "vendor-risk", "vciso"],
+    services: ["gap-assessment", "audit-preparation", "vendor-risk", "vciso", "vapt", "cloud-security-assessment", "soc-monitoring", "incident-response", "application-security", "iam"],
     tool: "soc-2",
   },
   {
@@ -95,7 +95,7 @@ export const FRAMEWORKS = [
     issuer: "European Union", assessor: "Supervisory authorities enforce it", output: "Demonstrated accountability, no general certificate", cycle: "Ongoing obligation", region: "European Union and EEA, extraterritorial reach",
     structure: ["Principles and lawful bases", "Data subject rights", "Accountability, records of processing and DPIAs", "Security and breach notification", "International transfers"],
     evidence: ["Records of processing", "Lawful basis assessments", "DPIAs", "Privacy notices", "Breach log", "Transfer assessments", "Processor agreements"],
-    services: ["privacy-advisory", "pims-implementation", "vendor-risk"],
+    services: ["privacy-advisory", "pims-implementation", "vendor-risk", "incident-response"],
   },
   {
     slug: "dpdpa", code: "DPDPA", name: "India Digital Personal Data Protection Act, 2023", type: "regulation", family: "Privacy law",
@@ -105,7 +105,7 @@ export const FRAMEWORKS = [
     issuer: "Government of India (MeitY)", assessor: "Data Protection Board of India enforces it", output: "Demonstrated compliance, no certificate", cycle: "Ongoing obligation", region: "India, with reach to processing linked to offering services in India",
     structure: ["Notice and consent", "Rights of Data Principals", "Reasonable security safeguards", "Personal data breach intimation", "Additional duties for Significant Data Fiduciaries", "Consent Managers"],
     evidence: ["Data inventory", "Notices and consent records", "Rights request procedure", "Security safeguards", "Breach response plan", "Retention schedule"],
-    services: ["privacy-advisory", "gap-assessment", "pims-implementation"],
+    services: ["privacy-advisory", "gap-assessment", "pims-implementation", "incident-response"],
     notice: "Check the current commencement dates for each obligation. DU-NZO confirms the timeline that applies to you during assessment.",
   },
   {
@@ -116,7 +116,7 @@ export const FRAMEWORKS = [
     issuer: "NIST (United States)", assessor: "Self assessment or independent review", output: "Current and target profiles", cycle: "Periodic reassessment", region: "Global use, US origin",
     structure: ["Six functions including the new Govern function", "Categories and subcategories of outcomes", "Profiles and implementation tiers"],
     evidence: ["Current profile", "Target profile", "Gap analysis", "Improvement roadmap"],
-    services: ["gap-assessment", "risk-assessment", "vciso"],
+    services: ["gap-assessment", "risk-assessment", "vciso", "security-architecture-review", "soc-monitoring", "incident-response"],
     tool: "security-maturity",
   },
   {
@@ -127,7 +127,7 @@ export const FRAMEWORKS = [
     issuer: "Center for Internet Security", assessor: "Self assessment or independent review", output: "Implementation group coverage", cycle: "Periodic reassessment", region: "Global",
     structure: ["18 controls with safeguards", "Implementation Groups IG1, IG2, IG3", "Mappings to other frameworks"],
     evidence: ["Asset and software inventories", "Configuration standards", "Vulnerability management records", "Access control records"],
-    services: ["gap-assessment", "vciso"],
+    services: ["gap-assessment", "vciso", "endpoint-email-security", "device-management", "it-asset-management"],
   },
   {
     slug: "pci-dss", code: "PCI DSS", name: "PCI DSS v4.0.1", type: "industry", family: "Industry",
@@ -137,7 +137,7 @@ export const FRAMEWORKS = [
     issuer: "PCI Security Standards Council", assessor: "QSA or self assessment, depending on level", output: "Report on Compliance or SAQ with Attestation of Compliance", cycle: "Annual validation", region: "Global",
     structure: ["12 principal requirements", "Scoping of the cardholder data environment", "Customised and defined approaches"],
     evidence: ["Network diagrams and data flows", "Scope documentation", "Vulnerability scans", "Penetration tests", "Access and logging records"],
-    services: ["gap-assessment", "audit-preparation", "risk-assessment"],
+    services: ["gap-assessment", "audit-preparation", "risk-assessment", "vapt", "cloud-security-assessment", "network-design-security", "application-security"],
   },
   {
     slug: "hipaa", code: "HIPAA", name: "HIPAA Privacy and Security Rules", type: "regulation", family: "Privacy law",
@@ -147,24 +147,50 @@ export const FRAMEWORKS = [
     issuer: "US Department of Health and Human Services", assessor: "HHS Office for Civil Rights enforces it", output: "Demonstrated compliance, no official certification", cycle: "Ongoing obligation", region: "United States",
     structure: ["Privacy Rule", "Security Rule safeguards: administrative, physical, technical", "Breach Notification Rule", "Business associate agreements"],
     evidence: ["Security risk analysis", "Policies and procedures", "Business associate agreements", "Workforce training records", "Breach log"],
-    services: ["privacy-advisory", "risk-assessment", "gap-assessment"],
+    services: ["privacy-advisory", "risk-assessment", "gap-assessment", "iam", "endpoint-email-security", "security-awareness-training"],
   },
 ];
 
+/* Service categories. id is used for section anchors and menu grouping. */
+export const SERVICE_CATEGORIES = [
+  { id: "compliance-and-grc", name: "Compliance and GRC", intro: "Gap assessments, ISO and SOC 2 readiness, audits, privacy and AI governance. The frameworks your customers and auditors ask for." },
+  { id: "cybersecurity", name: "Cybersecurity", intro: "Testing, monitoring and hands-on security engineering that find and fix real weaknesses across your stack." },
+  { id: "it-infrastructure", name: "IT Infrastructure", intro: "Cloud, network, device and workplace engineering, plus managed IT operations that keep your business running." },
+];
+
 export const SERVICES = [
-  { slug: "gap-assessment", name: "Gap Assessment", icon: "FileSearch", summary: "A structured review of where you stand against your target framework, with a prioritised gap register and a realistic timeline.", outcomes: ["Scored gap register", "Prioritised remediation roadmap", "Effort and timeline estimate", "Executive summary for leadership"], duration: "Typically 1 to 3 weeks" },
-  { slug: "iso-readiness", name: "ISO Readiness", icon: "Target", summary: "Get certification ready for ISO/IEC 27001, 27701, 42001, 9001 or 22301 with a clear path from gap to Stage 2.", outcomes: ["Readiness score", "Stage 1 document pack", "Certification body selection support", "Audit day preparation"], duration: "Scoped to your standard" },
-  { slug: "isms-implementation", name: "ISMS Implementation", icon: "Lock", summary: "Design and embed an ISO/IEC 27001 information security management system around how your teams actually work.", outcomes: ["ISMS scope and context", "Risk method and register", "Statement of Applicability", "Policies and operating procedures"], duration: "Typically 3 to 9 months" },
-  { slug: "pims-implementation", name: "PIMS Implementation", icon: "Fingerprint", summary: "Build an ISO/IEC 27701 privacy information management system aligned with GDPR, DPDPA and other privacy laws.", outcomes: ["Controller and processor role mapping", "Records of processing", "Privacy impact assessments", "Rights and consent processes"], duration: "Scoped to your processing" },
-  { slug: "risk-assessment", name: "Risk Assessment", icon: "Gauge", summary: "Identify, analyse and treat information security, privacy and AI risks with a method your auditors will accept.", outcomes: ["Risk methodology", "Risk register", "Treatment plan", "Risk owner sign off"], duration: "Typically 2 to 4 weeks" },
-  { slug: "policy-development", name: "Policy Development", icon: "ScrollText", summary: "Clear, right sized policies and procedures that satisfy auditors and that your people can follow.", outcomes: ["Policy set mapped to controls", "Procedures and standards", "Approval and review workflow", "Acknowledgement tracking"], duration: "Typically 2 to 6 weeks" },
-  { slug: "internal-audit", name: "Internal Audit", icon: "ClipboardCheck", summary: "Independent internal audits and management reviews that meet ISO clause 9 requirements and find issues before the external auditor does.", outcomes: ["Audit programme", "Audit report and findings", "Nonconformity register", "Management review support"], duration: "Typically 1 to 3 weeks" },
-  { slug: "audit-preparation", name: "Audit Preparation", icon: "BadgeCheck", summary: "Preparation for certification audits and SOC 2 examinations: evidence readiness, mock interviews and auditor liaison.", outcomes: ["Evidence readiness review", "Mock audit and interviews", "Auditor liaison", "Finding response support"], duration: "Typically 2 to 6 weeks" },
-  { slug: "vendor-risk", name: "Vendor Risk", icon: "Network", summary: "Third party risk management that scales: tiering, due diligence, contract clauses and ongoing monitoring.", outcomes: ["Vendor inventory and tiering", "Due diligence questionnaires", "Contract security clauses", "Monitoring cadence"], duration: "Setup plus ongoing" },
-  { slug: "bcp-dr", name: "BCP and DR", icon: "LifeBuoy", summary: "Business continuity and disaster recovery planning aligned with ISO 22301 and ISO/IEC 27001 continuity controls.", outcomes: ["Business impact analysis", "Continuity and recovery plans", "Tabletop exercises", "Recovery test reports"], duration: "Typically 4 to 10 weeks" },
-  { slug: "vciso", name: "vCISO", icon: "UserRound", summary: "Senior security leadership on demand: strategy, board reporting, customer security reviews and program ownership.", outcomes: ["Security strategy and roadmap", "Board and investor reporting", "Customer questionnaire support", "Program governance"], duration: "Monthly retainer" },
-  { slug: "privacy-advisory", name: "Privacy Advisory", icon: "Scale", summary: "Practical privacy guidance across GDPR, DPDPA, HIPAA and global laws, including outsourced DPO support.", outcomes: ["Applicability assessment", "Privacy program design", "DPIAs", "Outsourced DPO support"], duration: "Project or retainer" },
-  { slug: "ai-governance", name: "AI Governance", icon: "Sparkles", summary: "Responsible AI governance aligned with ISO/IEC 42001, covering AI inventory, risk and impact assessments, and controls.", outcomes: ["AI system inventory", "AI risk and impact assessments", "AI policy and roles", "ISO/IEC 42001 readiness"], duration: "Scoped to your AI systems" },
+  { slug: "gap-assessment", name: "Gap Assessment", icon: "FileSearch", category: "Compliance and GRC", summary: "A structured review of where you stand against your target framework, with a prioritised gap register and a realistic timeline.", outcomes: ["Scored gap register", "Prioritised remediation roadmap", "Effort and timeline estimate", "Executive summary for leadership"], duration: "Typically 1 to 3 weeks" },
+  { slug: "iso-readiness", name: "ISO Readiness", icon: "Target", category: "Compliance and GRC", summary: "Get certification ready for ISO/IEC 27001, 27701, 42001, 9001 or 22301 with a clear path from gap to Stage 2.", outcomes: ["Readiness score", "Stage 1 document pack", "Certification body selection support", "Audit day preparation"], duration: "Scoped to your standard" },
+  { slug: "isms-implementation", name: "ISMS Implementation", icon: "Lock", category: "Compliance and GRC", summary: "Design and embed an ISO/IEC 27001 information security management system around how your teams actually work.", outcomes: ["ISMS scope and context", "Risk method and register", "Statement of Applicability", "Policies and operating procedures"], duration: "Typically 3 to 9 months" },
+  { slug: "pims-implementation", name: "PIMS Implementation", icon: "Fingerprint", category: "Compliance and GRC", summary: "Build an ISO/IEC 27701 privacy information management system aligned with GDPR, DPDPA and other privacy laws.", outcomes: ["Controller and processor role mapping", "Records of processing", "Privacy impact assessments", "Rights and consent processes"], duration: "Scoped to your processing" },
+  { slug: "risk-assessment", name: "Risk Assessment", icon: "Gauge", category: "Compliance and GRC", summary: "Identify, analyse and treat information security, privacy and AI risks with a method your auditors will accept.", outcomes: ["Risk methodology", "Risk register", "Treatment plan", "Risk owner sign off"], duration: "Typically 2 to 4 weeks" },
+  { slug: "policy-development", name: "Policy Development", icon: "ScrollText", category: "Compliance and GRC", summary: "Clear, right sized policies and procedures that satisfy auditors and that your people can follow.", outcomes: ["Policy set mapped to controls", "Procedures and standards", "Approval and review workflow", "Acknowledgement tracking"], duration: "Typically 2 to 6 weeks" },
+  { slug: "internal-audit", name: "Internal Audit", icon: "ClipboardCheck", category: "Compliance and GRC", summary: "Independent internal audits and management reviews that meet ISO clause 9 requirements and find issues before the external auditor does.", outcomes: ["Audit programme", "Audit report and findings", "Nonconformity register", "Management review support"], duration: "Typically 1 to 3 weeks" },
+  { slug: "audit-preparation", name: "Audit Preparation", icon: "BadgeCheck", category: "Compliance and GRC", summary: "Preparation for certification audits and SOC 2 examinations: evidence readiness, mock interviews and auditor liaison.", outcomes: ["Evidence readiness review", "Mock audit and interviews", "Auditor liaison", "Finding response support"], duration: "Typically 2 to 6 weeks" },
+  { slug: "vendor-risk", name: "Vendor Risk", icon: "Network", category: "Compliance and GRC", summary: "Third party risk management that scales: tiering, due diligence, contract clauses and ongoing monitoring.", outcomes: ["Vendor inventory and tiering", "Due diligence questionnaires", "Contract security clauses", "Monitoring cadence"], duration: "Setup plus ongoing" },
+  { slug: "bcp-dr", name: "BCP and DR", icon: "LifeBuoy", category: "Compliance and GRC", summary: "Business continuity and disaster recovery planning aligned with ISO 22301 and ISO/IEC 27001 continuity controls.", outcomes: ["Business impact analysis", "Continuity and recovery plans", "Tabletop exercises", "Recovery test reports"], duration: "Typically 4 to 10 weeks" },
+  { slug: "vciso", name: "vCISO", icon: "UserRound", category: "Compliance and GRC", summary: "Senior security leadership on demand: strategy, board reporting, customer security reviews and program ownership.", outcomes: ["Security strategy and roadmap", "Board and investor reporting", "Customer questionnaire support", "Program governance"], duration: "Monthly retainer" },
+  { slug: "privacy-advisory", name: "Privacy Advisory", icon: "Scale", category: "Compliance and GRC", summary: "Practical privacy guidance across GDPR, DPDPA, HIPAA and global laws, including outsourced DPO support.", outcomes: ["Applicability assessment", "Privacy program design", "DPIAs", "Outsourced DPO support"], duration: "Project or retainer" },
+  { slug: "ai-governance", name: "AI Governance", icon: "Sparkles", category: "Compliance and GRC", summary: "Responsible AI governance aligned with ISO/IEC 42001, covering AI inventory, risk and impact assessments, and controls.", outcomes: ["AI system inventory", "AI risk and impact assessments", "AI policy and roles", "ISO/IEC 42001 readiness"], duration: "Scoped to your AI systems" },
+  /* Cybersecurity */
+  { slug: "vapt", name: "Vulnerability Assessment and Penetration Testing", icon: "ScanSearch", category: "Cybersecurity", summary: "Web, mobile, API, network and cloud testing with a prioritised findings report and a retest of fixed issues.", outcomes: ["Scope and rules of engagement", "Prioritised findings report with severity ratings", "Remediation guidance for each finding", "Retest of fixed issues"], duration: "Typically 1 to 3 weeks" },
+  { slug: "cloud-security-assessment", name: "Cloud Security Assessment", icon: "CloudCog", category: "Cybersecurity", summary: "Configuration and posture review of AWS, Azure and Google Cloud against CIS Benchmarks, with a prioritised remediation plan.", outcomes: ["Posture findings mapped to CIS Benchmarks", "Prioritised remediation plan", "Identity and network exposure review", "Reassessment of remediated items"], duration: "Typically 2 to 4 weeks" },
+  { slug: "soc-monitoring", name: "Managed Security Monitoring (SOC)", icon: "Radar", category: "Cybersecurity", summary: "Continuous log monitoring, threat detection and alert triage, with clear incident escalation to your team.", outcomes: ["Log source onboarding", "Detection use cases tuned to your environment", "Alert triage and escalation runbook", "Monthly detection and incident summary"], duration: "Ongoing managed service" },
+  { slug: "incident-response", name: "Incident Response", icon: "Siren", category: "Cybersecurity", summary: "Response planning, tabletop exercises and hands-on support during a security incident.", outcomes: ["Incident response plan and playbooks", "Tabletop exercise with leadership", "On-call support during an incident", "Post-incident review and lessons learned"], duration: "Retainer plus per-incident support" },
+  { slug: "security-architecture-review", name: "Security Architecture Review", icon: "Waypoints", category: "Cybersecurity", summary: "Review of network, application and cloud architecture, with a practical Zero Trust roadmap.", outcomes: ["Architecture review across network, application and cloud", "Zero Trust roadmap", "Prioritised design recommendations", "Reference architecture for key systems"], duration: "Typically 2 to 5 weeks" },
+  { slug: "iam", name: "Identity and Access Management", icon: "KeyRound", category: "Cybersecurity", summary: "Design and implementation of single sign-on, multi-factor authentication, privileged access management and access reviews.", outcomes: ["SSO and MFA rollout plan", "Privileged access management design", "Joiner, mover and leaver process", "Periodic access review design"], duration: "Typically 3 to 8 weeks" },
+  { slug: "endpoint-email-security", name: "Endpoint and Email Security", icon: "Laptop", category: "Cybersecurity", summary: "Endpoint detection and response, device hardening, email security configuration and phishing simulation.", outcomes: ["EDR deployment and tuning", "Device hardening baselines", "Email authentication and filtering setup", "Phishing simulation and report"], duration: "Typically 2 to 6 weeks" },
+  { slug: "application-security", name: "Application Security", icon: "Code2", category: "Cybersecurity", summary: "Secure code review, a secure development lifecycle and DevSecOps checks built into your delivery pipeline.", outcomes: ["Secure code review of critical applications", "Secure development lifecycle definition", "Pipeline security checks: SAST, dependency and secret scanning", "Developer guidance and standards"], duration: "Typically 2 to 6 weeks" },
+  { slug: "security-awareness-training", name: "Security Awareness Training", icon: "GraduationCap", category: "Cybersecurity", summary: "Role-based training programmes and phishing awareness campaigns that measurably change behaviour.", outcomes: ["Role-based training curriculum", "Phishing awareness campaigns", "Completion and results tracking", "Targeted follow-up for higher risk groups"], duration: "Programme plus ongoing campaigns" },
+  /* IT Infrastructure */
+  { slug: "cloud-migration-management", name: "Cloud Migration and Management", icon: "CloudUpload", category: "IT Infrastructure", summary: "Planning, migration and ongoing management of workloads on AWS, Azure and Google Cloud.", outcomes: ["Migration assessment and plan", "Landing zone setup", "Workload migration execution", "Ongoing cost and performance management"], duration: "Scoped to your environment" },
+  { slug: "network-design-security", name: "Network Design and Security", icon: "Router", category: "IT Infrastructure", summary: "Design and implementation of firewalls, VPN, secure WiFi, network segmentation and software-defined WAN.", outcomes: ["Network architecture and segmentation design", "Firewall and VPN configuration", "Secure WiFi deployment", "Software-defined WAN options"], duration: "Typically 3 to 8 weeks" },
+  { slug: "m365-google-workspace", name: "Microsoft 365 and Google Workspace", icon: "LayoutGrid", category: "IT Infrastructure", summary: "Setup, migration, security hardening and day-to-day administration of Microsoft 365 and Google Workspace.", outcomes: ["Tenant setup or migration", "Security baseline and hardening", "Identity and conditional access configuration", "Ongoing administration"], duration: "Setup plus ongoing administration" },
+  { slug: "device-management", name: "Device Management", icon: "MonitorSmartphone", category: "IT Infrastructure", summary: "Laptop and mobile device management with Microsoft Intune, Jamf or similar tools, including encryption and patching.", outcomes: ["Device enrolment and baseline configuration", "Disk encryption enforcement", "Patch and update management", "Compliance and health reporting"], duration: "Setup plus ongoing management" },
+  { slug: "backup-disaster-recovery", name: "Backup and Disaster Recovery", icon: "DatabaseBackup", category: "IT Infrastructure", summary: "Backup design, restore testing and recovery planning for your critical systems.", outcomes: ["Backup architecture for critical systems", "Restore testing and evidence", "Recovery time and recovery point objectives", "Recovery runbooks"], duration: "Typically 2 to 6 weeks" },
+  { slug: "managed-it-support", name: "Managed IT Support", icon: "Headset", category: "IT Infrastructure", summary: "Helpdesk, user onboarding and offboarding, and day-to-day IT operations support.", outcomes: ["Helpdesk with defined response targets", "Onboarding and offboarding checklists", "IT operations runbooks", "Regular service reporting"], duration: "Monthly retainer" },
+  { slug: "server-datacenter-management", name: "Server and Data Center Management", icon: "Server", category: "IT Infrastructure", summary: "Administration, monitoring and patching of on-premises and hybrid servers and data center systems.", outcomes: ["Server hardening and baseline", "Monitoring and alerting", "Patch management", "Capacity and availability reporting"], duration: "Ongoing managed service" },
+  { slug: "it-asset-management", name: "IT Asset Management", icon: "Boxes", category: "IT Infrastructure", summary: "Hardware and software inventory, licence tracking and lifecycle management in one register.", outcomes: ["Hardware and software inventory", "Licence tracking and renewal alerts", "Lifecycle and refresh planning", "Disposal and data-wipe records"], duration: "Setup plus ongoing" },
 ];
 
 export const SOLUTIONS = [
@@ -346,7 +372,7 @@ export const NAV = [
     { title: "ISO standards", items: FRAMEWORKS.filter((f) => f.family === "ISO").map((f) => ({ label: f.code, to: `/compliance/${f.slug}`, desc: f.title })) },
     { title: "Assurance, laws and frameworks", items: FRAMEWORKS.filter((f) => f.family !== "ISO").map((f) => ({ label: f.code, to: `/compliance/${f.slug}`, desc: f.title })) },
   ] },
-  { label: "Services", items: SERVICES.map((s) => ({ label: s.name, to: `/services/${s.slug}`, icon: s.icon })) , grid: true },
+  { label: "Services", variant: "services", columns: SERVICE_CATEGORIES.map((c) => ({ title: c.name, items: SERVICES.filter((s) => s.category === c.name).map((s) => ({ label: s.name, to: `/services/${s.slug}`, icon: s.icon })) })) },
   { label: "Platform", to: "/platform" },
   { label: "Resources", items: [
     { label: "Free Tools", to: "/tools", icon: "Wrench", desc: "14 assessments, generators and planners" },

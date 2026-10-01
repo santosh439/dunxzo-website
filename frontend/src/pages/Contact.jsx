@@ -6,7 +6,7 @@ import { BRAND, mailto } from "../content/site.js";
 import { api } from "../lib/api.js";
 import { useSeo } from "../lib/seo.js";
 
-const TOPICS = ["Compliance roadmap", "ISO certification", "SOC 2", "Privacy (GDPR, DPDPA)", "AI governance", "GCC Command Center", "vCISO", "Platform demo", "Partnership", "Other"];
+const TOPICS = ["Compliance roadmap", "ISO certification", "SOC 2", "Privacy (GDPR, DPDPA)", "AI governance", "GCC Command Center", "vCISO", "Cybersecurity services", "IT infrastructure", "Platform demo", "Partnership", "Other"];
 
 export default function Contact() {
   useSeo("Contact DU-NZO", `Talk to a DU-NZO expert. Email ${BRAND.email}.`);

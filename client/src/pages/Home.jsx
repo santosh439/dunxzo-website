@@ -5,7 +5,7 @@ import { ArrowRight, Mail, ShieldCheck, Check, Globe2, Lock, FileText, BookOpen 
 import { Aurora, Reveal, Spotlight, SectionHead, TypeBadge, CtaBand } from "../components/ui.jsx";
 import Icon from "../components/Icon.jsx";
 import DashboardMock from "../components/DashboardMock.jsx";
-import { BRAND, FRAMEWORKS, TYPES, PLATFORM_MODULES, GCC_DOMAINS, MATURITY_LEVELS, REGIONS, TOOLS, GUIDES, SOLUTIONS, mailto } from "../content/site.js";
+import { BRAND, FRAMEWORKS, TYPES, PLATFORM_MODULES, GCC_DOMAINS, MATURITY_LEVELS, REGIONS, TOOLS, GUIDES, SOLUTIONS, SERVICE_CATEGORIES, mailto } from "../content/site.js";
 import { useSeo } from "../lib/seo.js";
 
 /* ---------------- Hero ---------------- */
@@ -256,6 +256,34 @@ function Platform() {
   );
 }
 
+/* ---------------- Beyond compliance: Cybersecurity and IT Infrastructure ---------------- */
+function BeyondCompliance() {
+  const cards = [
+    { cat: SERVICE_CATEGORIES[1], icon: "ShieldCheck", points: ["Vulnerability and penetration testing", "Cloud security assessment", "Managed security monitoring (SOC)", "Incident response"] },
+    { cat: SERVICE_CATEGORIES[2], icon: "Server", points: ["Cloud migration and management", "Network design and security", "Device management", "Managed IT support"] },
+  ];
+  return (
+    <section className="container-x py-24 md:py-32">
+      <SectionHead kicker="Beyond compliance" title="Beyond compliance: Cybersecurity and IT Infrastructure." body="The same team that builds your compliance program also tests, secures and runs the technology underneath it." />
+      <div className="mt-12 grid gap-6 md:grid-cols-2">
+        {cards.map(({ cat, icon, points }, i) => (
+          <Reveal key={cat.id} delay={i * 0.08}>
+            <Spotlight as={Link} to={`/services#${cat.id}`} className="glass focus-ring group flex h-full flex-col rounded-3xl p-8">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet to-aqua text-void"><Icon name={icon} size={22} /></span>
+              <h3 className="mt-6 text-2xl font-semibold tracking-[-0.03em]">{cat.name}</h3>
+              <p className="mt-2 leading-relaxed text-mute">{cat.intro}</p>
+              <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+                {points.map((p) => <li key={p} className="flex items-center gap-2 text-sm text-ink/85"><Check size={15} className="shrink-0 text-aqua" strokeWidth={2.6} />{p}</li>)}
+              </ul>
+              <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-aqua">Explore {cat.name}<ArrowRight size={15} className="transition group-hover:translate-x-0.5" /></span>
+            </Spotlight>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /* ---------------- Tools ---------------- */
 function Tools() {
   const featured = TOOLS.slice(0, 8);
@@ -403,6 +431,7 @@ export default function Home() {
       <StartupJourney />
       <GccJourney />
       <Platform />
+      <BeyondCompliance />
       <Tools />
       <Comparison />
       <Global />
