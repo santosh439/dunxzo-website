@@ -13,6 +13,7 @@ export default function Contact() {
   const [f, setF] = useState({ name: "", email: "", company: "", topic: TOPICS[0], message: "" });
   const [state, setState] = useState("idle");
   const [err, setErr] = useState({});
+  const [mkt, setMkt] = useState(false);
   const submit = async (e) => {
     e.preventDefault();
     const x = {};
@@ -21,7 +22,7 @@ export default function Contact() {
     setErr(x);
     if (Object.keys(x).length) return;
     setState("sending");
-    try { await api.sendLead({ ...f, source: "contact", message: `[${f.topic}] ${f.message}` }); setState("sent"); } catch { setState("error"); }
+    try { await api.sendLead({ ...f, source: "contact", message: `[${f.topic}] ${f.message}`, marketing: mkt }); setState("sent"); } catch { setState("error"); }
   };
   return (
     <>
@@ -43,7 +44,13 @@ export default function Contact() {
               <div><label htmlFor="c-t" className="label">Topic</label><select id="c-t" className="field" value={f.topic} onChange={(e) => setF({ ...f, topic: e.target.value })}>{TOPICS.map((t) => <option key={t} className="bg-night">{t}</option>)}</select></div>
               <div className="sm:col-span-2"><label htmlFor="c-m" className="label">How can DU-NZO help?</label><textarea id="c-m" rows={5} className="field !h-auto py-3" value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} /></div>
               {state === "error" && <p role="alert" className="text-sm text-rose sm:col-span-2">Something went wrong. Email {BRAND.email} directly.</p>}
-              <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-mute">By submitting you agree to the DU-NZO <Link to="/legal/privacy" className="underline">Privacy Policy</Link>.</p><button className="btn-glow" disabled={state === "sending"}>{state === "sending" ? <Loader2 size={17} className="animate-spin" /> : "Send message"}</button></div>
+              <div className="sm:col-span-2">
+                <label className="flex cursor-pointer items-start gap-3 text-sm text-mute">
+                  <input type="checkbox" checked={mkt} onChange={(e) => setMkt(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#8B7CFF]" />
+                  <span>Send me DU-NZO updates and insights. I can unsubscribe anytime.</span>
+                </label>
+              </div>
+              <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-mute">By submitting, you agree to our <Link to="/legal/privacy" className="underline">Privacy Policy</Link>.</p><button className="btn-glow" disabled={state === "sending"}>{state === "sending" ? <Loader2 size={17} className="animate-spin" /> : "Send message"}</button></div>
             </form>
           )}
         </div>

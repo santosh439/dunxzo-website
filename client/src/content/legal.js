@@ -1,0 +1,233 @@
+/* Legal page content. Structured so the Legal page can render a sticky table of
+ * contents, anchors, a print button and highlighted placeholders.
+ *
+ * Placeholder convention: any text inside [square brackets] is a value DU-NZO must
+ * confirm. It renders highlighted in amber so it is easy to find and replace.
+ * Inline links use [[Label|/path]] for internal routes and [[Label|https://...]] or
+ * [[Label|mailto:...]] for external links.
+ *
+ * To remove the "prepared for legal review" banner from all four pages, set
+ * LEGAL_REVIEW_NOTICE below to false.
+ */
+
+export const LEGAL_REVIEW_NOTICE = true;
+export const LEGAL_CONTACT = "santosh@du-nzo.com";
+const MAIL = `[[${LEGAL_CONTACT}|mailto:${LEGAL_CONTACT}]]`;
+
+export const LEGAL_DOCS = {
+  privacy: {
+    title: "Privacy Policy",
+    version: "1.0",
+    updated: "[Effective date]",
+    seo: "How DU-NZO collects, uses, shares and protects personal data, and your rights under GDPR, India's DPDP Act 2023, the IT Act 2000 and US state privacy laws.",
+    sections: [
+      { id: "who-we-are", h: "1. Who we are", blocks: [
+        { p: "DU-NZO ([[www.du-nzo.com|https://www.du-nzo.com]]) is the data controller, and the Data Fiduciary under India's DPDP Act 2023, for the personal data described in this policy." },
+        { ul: ["Legal entity name: [Registered company name]", "Registered office: [Registered office address]", "Registration number: [CIN or registration number]"] },
+        { p: `For all privacy questions, contact us at ${MAIL}.` },
+      ]},
+      { id: "scope", h: "2. Who this policy covers", blocks: [
+        { p: "This policy applies to:" },
+        { ul: ["Visitors to the DU-NZO website", "People who use the free tools, assessments and the Startup Compliance Launchpad", "People who contact us or ask for a proposal", "Prospective and current clients", "People who request documents through the Trust Center"] },
+      ]},
+      { id: "data-we-collect", h: "3. Data we collect", blocks: [
+        { p: "We collect only what we need, depending on how you use the site:" },
+        { ul: [
+          "Contact form: your name, work email, company, the topic you choose and your message.",
+          "Launchpad and assessments: your answers and results, but only when you choose to send them to us or email them. If you also tick the updates box, we record that choice.",
+          "Trust Center requests: your name, work email and company.",
+          "Technical data: IP address, browser and device type, and pages visited, collected automatically for security and to keep the site working.",
+          "Cookies and browser storage: small files or entries stored on your device, described in our [[Cookie Policy|/legal/cookies]].",
+        ]},
+      ]},
+      { id: "tool-data", h: "4. Assessment and tool answers stay in your browser", blocks: [
+        { p: "The free tools, assessments, the Launchpad and the ISO Certification Planner run in your browser. Your answers and progress are stored on your own device and are not sent to DU-NZO unless you choose to submit them (for example by emailing your roadmap or requesting a review). You can clear them at any time through your browser settings or the Cookie settings panel." },
+      ]},
+      { id: "purposes", h: "5. Why we use your data and our lawful bases", blocks: [
+        { p: "We use personal data only for clear purposes, each with a lawful basis under the EU/UK GDPR and a recognised ground under India's DPDP Act 2023." },
+        { table: { head: ["Purpose", "GDPR lawful basis", "DPDP Act 2023 ground"], rows: [
+          ["Responding to your enquiry", "Legitimate interests / steps before a contract", "Certain legitimate uses / voluntary provision"],
+          ["Providing a service you asked for (for example sending your roadmap)", "Contract / consent", "Voluntary provision for a specified purpose"],
+          ["Sending documents you requested through the Trust Center", "Consent / legitimate interests", "Voluntary provision for a specified purpose"],
+          ["Security, fraud prevention and keeping the site running", "Legitimate interests", "Certain legitimate uses"],
+          ["Improving the website", "Legitimate interests / consent (analytics)", "Certain legitimate uses / consent"],
+          ["Sending marketing updates", "Consent (you can withdraw anytime)", "Consent (you can withdraw anytime)"],
+          ["Meeting a legal obligation", "Legal obligation", "Legal obligation"],
+        ]}},
+      ]},
+      { id: "india-dpdp", h: "6. India: DPDP Act 2023 and DPDP Rules 2025", blocks: [
+        { p: "If you are in India, the Digital Personal Data Protection Act 2023 and the DPDP Rules 2025 apply. In plain language:" },
+        { ul: [
+          "Notice: this policy is our notice to you. It explains what data we collect, why, and how to use your rights, before or when we ask for your consent.",
+          "Consent: where we rely on consent, you can withdraw it as easily as you gave it, for example by using the Cookie settings panel or by emailing us. Withdrawing consent does not affect what we did before you withdrew it.",
+          "Your rights as a Data Principal include: access to your data, correction, completion, updating and erasure, a readily available way to raise a grievance, and the right to nominate another person to use your rights if you cannot.",
+          "How to contact us: email " + MAIL + ". We aim to respond within [grievance response timeline, for example 15 days].",
+          "Grievance Officer: [Grievance Officer name and contact].",
+          "You may also complain to the Data Protection Board of India. [Complaint portal or process].",
+        ]},
+      ]},
+      { id: "india-it-act", h: "7. India: IT Act 2000 and SPDI Rules 2011", blocks: [
+        { p: "During the transition to the DPDP Act, where the Information Technology Act 2000 and the SPDI Rules 2011 still apply, we maintain reasonable security practices and procedures for any sensitive personal data we handle." },
+        { p: "Grievance Officer under the IT Act: [Grievance Officer name and contact]. We aim to acknowledge grievances within [acknowledgement timeline] and resolve them within [resolution timeline]." },
+      ]},
+      { id: "eu-uk-gdpr", h: "8. EU and UK GDPR", blocks: [
+        { p: "If you are in the European Economic Area or the United Kingdom, you have the right to:" },
+        { ul: ["Access your personal data", "Rectify inaccurate data", "Erase your data", "Restrict or object to processing", "Data portability", "Withdraw consent at any time (without affecting earlier processing)", "Complain to your local data protection supervisory authority"] },
+        { p: "To use any of these rights, email " + MAIL + "." },
+        { p: "EU or UK representative (if one is appointed): [EU/UK representative name and contact]." },
+      ]},
+      { id: "us-state", h: "9. US state privacy laws", blocks: [
+        { p: "For residents of US states with privacy laws such as California (CCPA/CPRA): DU-NZO does not sell your personal information and does not share it for cross-context behavioural advertising. [Confirm this statement is accurate for DU-NZO's setup.]" },
+        { p: "You may have rights to know, access, correct and delete your personal information, and to not be discriminated against for using them. Email " + MAIL + " to make a request." },
+      ]},
+      { id: "sharing", h: "10. Who we share data with", blocks: [
+        { p: "We share personal data only with:" },
+        { ul: [
+          "Service providers who help us run the website and our business, under contract: hosting [Hosting provider], email [Email service provider], analytics [Analytics provider], and CRM [CRM provider].",
+          "Professional advisers such as lawyers and accountants, where needed.",
+          "Authorities or others where the law requires it.",
+        ]},
+        { p: "DU-NZO does not sell personal data." },
+      ]},
+      { id: "transfers", h: "11. International transfers", blocks: [
+        { p: "Some service providers may process data outside your country. Where the GDPR or UK GDPR applies, we use safeguards such as Standard Contractual Clauses or an adequacy decision. [Confirm transfer safeguards in place.]" },
+      ]},
+      { id: "retention", h: "12. How long we keep data", blocks: [
+        { p: "We keep personal data only as long as needed for the purpose it was collected, then delete or anonymise it." },
+        { table: { head: ["Data type", "Retention period"], rows: [
+          ["Contact and enquiry records", "[for example 24 months]"],
+          ["Submitted roadmaps and assessments", "[for example 24 months]"],
+          ["Trust Center requests", "[for example 12 months]"],
+          ["Marketing consent records", "Until you unsubscribe, plus [for example 12 months]"],
+          ["Technical and security logs", "[for example 12 months]"],
+        ]}},
+      ]},
+      { id: "security", h: "13. How we protect data", blocks: [
+        { p: "We use appropriate technical and organisational measures, including encryption in transit, access control and least-privilege access. No method of transmission or storage is completely secure, but we work to protect your data. This policy does not claim any security certification DU-NZO does not hold." },
+      ]},
+      { id: "children", h: "14. Children", blocks: [
+        { p: "This website is for businesses and is not directed at children under 18. We do not knowingly collect personal data from children. If you believe a child has given us data, contact us and we will delete it." },
+      ]},
+      { id: "automated", h: "15. Automated processing", blocks: [
+        { p: "The Launchpad, assessments, planners and estimators produce indicative results using fixed rules based on your answers. They do not make legal or similarly significant decisions about you, and no decision with legal or similar effect is made solely by automated means." },
+      ]},
+      { id: "changes", h: "16. Changes to this policy", blocks: [
+        { p: "We may update this policy from time to time. The latest version will always be on this page, with the updated date at the top. If a change is significant, we will take reasonable steps to let you know." },
+      ]},
+      { id: "contact", h: "17. Contact us", blocks: [
+        { p: "For any privacy question, request or complaint, contact DU-NZO at " + MAIL + "." },
+        { p: "Registered office: [Registered office address]." },
+      ]},
+    ],
+  },
+
+  terms: {
+    title: "Terms of Use",
+    version: "1.0",
+    updated: "[Effective date]",
+    seo: "The terms that govern use of the DU-NZO website, free tools, assessments, roadmaps, estimates and checklists.",
+    sections: [
+      { id: "acceptance", h: "1. Acceptance of these terms", blocks: [
+        { p: "By using the DU-NZO website you agree to these Terms of Use. If you do not agree, please do not use the site. The site is intended for business users. You must be able to form a binding contract to use it." },
+      ]},
+      { id: "indicative", h: "2. Free tools are indicative guidance only", blocks: [
+        { p: "The free tools, assessments, Launchpad roadmaps, cost estimates, planners and checklists on this site provide general, indicative guidance. They are not legal advice, audit opinions, certification decisions, or a guarantee of any outcome, certification or compliance. Always confirm your specific obligations with a qualified professional." },
+      ]},
+      { id: "no-relationship", h: "3. No consulting relationship", blocks: [
+        { p: "Using this site or its tools does not create a consulting, advisory or client relationship with DU-NZO. A relationship begins only when a written engagement or proposal is signed by both parties." },
+      ]},
+      { id: "acceptable-use", h: "4. Acceptable use", blocks: [
+        { p: "You agree not to:" },
+        { ul: ["Misuse the site or interfere with its operation", "Scrape or bulk-copy the site or its content", "Reverse engineer any part of the site or tools", "Perform security testing or scanning without our prior written permission", "Submit unlawful, harmful or misleading content"] },
+      ]},
+      { id: "ip", h: "5. Intellectual property", blocks: [
+        { p: "DU-NZO owns the content, design, tools and templates on this site. You may use them for your own personal or internal business use only. You may not resell, republish or redistribute them without our written permission." },
+      ]},
+      { id: "third-party", h: "6. Third-party links and trademarks", blocks: [
+        { p: "The site may link to third-party websites. We are not responsible for their content or practices. Third-party trademarks belong to their respective owners (see our [[Disclaimer|/legal/disclaimer]])." },
+      ]},
+      { id: "liability", h: "7. Disclaimers and limitation of liability", blocks: [
+        { p: "The site and its tools are provided as is and as available, without warranties of any kind, to the fullest extent permitted by law. To the extent permitted by law, DU-NZO is not liable for any indirect, incidental or consequential loss, or for any loss arising from reliance on the tools or site content." },
+      ]},
+      { id: "indemnity", h: "8. Indemnity", blocks: [
+        { p: "You agree to indemnify and hold DU-NZO harmless from claims arising from your misuse of the site or breach of these terms, to the extent permitted by law." },
+      ]},
+      { id: "privacy", h: "9. Privacy", blocks: [
+        { p: "Your use of the site is also covered by our [[Privacy Policy|/legal/privacy]] and [[Cookie Policy|/legal/cookies]]." },
+      ]},
+      { id: "changes", h: "10. Changes, suspension and termination", blocks: [
+        { p: "We may update these terms, and may suspend or end access to the site, at any time. The current terms are on this page with the updated date at the top. Continued use after a change means you accept the updated terms." },
+      ]},
+      { id: "law", h: "11. Governing law and jurisdiction", blocks: [
+        { p: "These terms are governed by the laws of [India], and the courts of [Bengaluru, Karnataka] have exclusive jurisdiction. [Confirm governing law and jurisdiction.]" },
+      ]},
+      { id: "contact", h: "12. Contact", blocks: [
+        { p: "Questions about these terms: " + MAIL + "." },
+      ]},
+    ],
+  },
+
+  cookies: {
+    title: "Cookie Policy",
+    version: "1.0",
+    updated: "[Effective date]",
+    seo: "How DU-NZO uses cookies and browser storage, the categories we use, and how to manage or withdraw your consent.",
+    sections: [
+      { id: "what", h: "1. What cookies and browser storage are", blocks: [
+        { p: "Cookies are small text files a website stores on your device. Browser storage (such as localStorage) is a similar way for a site to keep information on your device. Both help a site remember things between visits." },
+      ]},
+      { id: "categories", h: "2. Categories we use", blocks: [
+        { ul: [
+          "Strictly necessary: required for the site and consent choices to work. Always on and cannot be switched off.",
+          "Preferences: remember choices such as your tool progress and display settings.",
+          "Analytics: help us understand how the site is used. [Analytics provider, if any].",
+          "Marketing: used to measure or deliver marketing. [Marketing provider, if any].",
+        ]},
+        { p: "We do not load analytics or marketing scripts until you consent to that category." },
+      ]},
+      { id: "cookie-table", h: "3. Cookies and storage we use", blocks: [
+        { table: { head: ["Name", "Provider", "Purpose", "Category", "Duration"], rows: [
+          ["dunzo.consent", "DU-NZO (this site)", "Stores your cookie consent choice and date", "Strictly necessary", "12 months"],
+          ["dunzo.v1", "DU-NZO (this site)", "Remembers planner and assessment progress in your browser", "Preferences", "Until you clear it"],
+          ["[analytics cookie]", "[Analytics provider]", "[Measures site usage]", "Analytics", "[duration]"],
+          ["[marketing cookie]", "[Marketing provider]", "[Measures campaigns]", "Marketing", "[duration]"],
+        ]}},
+        { note: "Fonts are self-hosted by DU-NZO, so no third-party font request is made before consent. If this changes, this table will be updated." },
+      ]},
+      { id: "manage", h: "4. How to manage or withdraw consent", blocks: [
+        { p: "You can change or withdraw your consent at any time using the Cookie settings link in the footer, which reopens the preferences panel. You can also clear cookies and storage through your browser settings. Withdrawing consent does not affect anything done before you withdrew it." },
+        { p: "We ask for consent again after 12 months, or sooner if the categories we use change." },
+      ]},
+    ],
+  },
+
+  disclaimer: {
+    title: "Disclaimer",
+    version: "1.0",
+    updated: "[Effective date]",
+    seo: "Important notices about DU-NZO's services, the limits of our free tools, and third-party trademarks.",
+    sections: [
+      { id: "not-cb", h: "1. DU-NZO is not a certification body", blocks: [
+        { p: "DU-NZO provides advisory, implementation, readiness and audit preparation services. DU-NZO is not a certification body and does not issue certificates. ISO certificates are issued only by accredited certification bodies, and SOC 2 reports are issued only by licensed CPA firms." },
+      ]},
+      { id: "not-legal-advice", h: "2. Not legal advice", blocks: [
+        { p: "Information on this site about laws such as GDPR, India's DPDP Act 2023, HIPAA and the EU AI Act is general guidance only and is not legal advice. Obtain advice from a qualified lawyer about your specific situation." },
+      ]},
+      { id: "indicative", h: "3. Indicative results", blocks: [
+        { p: "Tool results, roadmaps, timelines and cost estimates are indicative. They depend on your organisation's scope, context and circumstances, and are confirmed during a DU-NZO assessment." },
+      ]},
+      { id: "change", h: "4. Regulatory information may change", blocks: [
+        { p: "Laws, standards and regulatory timelines change. Content on this site may not reflect the most current requirements. Confirm current requirements before relying on any information here." },
+      ]},
+      { id: "trademarks", h: "5. Trademarks", blocks: [
+        { p: "ISO and ISO/IEC are trademarks of the International Organization for Standardization. SOC 2 is associated with the AICPA. NIST, CIS and PCI DSS belong to their respective owners. DU-NZO is not affiliated with or endorsed by these organisations unless expressly stated." },
+      ]},
+      { id: "no-guarantee", h: "6. No guarantee", blocks: [
+        { p: "DU-NZO does not guarantee certification, any audit outcome, or regulatory compliance. Outcomes depend on your organisation and on independent auditors and authorities." },
+      ]},
+      { id: "contact", h: "7. Contact", blocks: [
+        { p: "Questions about this disclaimer: " + MAIL + "." },
+      ]},
+    ],
+  },
+};

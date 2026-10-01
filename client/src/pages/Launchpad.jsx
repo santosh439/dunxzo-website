@@ -43,6 +43,7 @@ function Question({ q, value, onChange }) {
 function Results({ r, onRestart }) {
   const [sent, setSent] = useState("idle");
   const [email, setEmail] = useState("");
+  const [mkt, setMkt] = useState(false);
   const summary = [
     `DU-NZO Compliance Roadmap`,
     `Maturity: Level ${r.maturity.level} ${r.maturity.name} (${r.maturity.pct}%)`,
@@ -56,7 +57,7 @@ function Results({ r, onRestart }) {
     e.preventDefault();
     if (!/^\S+@\S+\.\S+$/.test(email)) return setSent("error");
     setSent("sending");
-    try { await api.sendLead({ name: email.split("@")[0], email, company: "", source: "launchpad", summary, message: "Please send my DU-NZO Compliance Roadmap and book a review." }); setSent("sent"); } catch { setSent("error"); }
+    try { await api.sendLead({ name: email.split("@")[0], email, company: "", source: "launchpad", summary, message: "Please send my DU-NZO Compliance Roadmap and book a review.", marketing: mkt }); setSent("sent"); } catch { setSent("error"); }
   };
   const statusCls = { "In place": "bg-aqua/15 text-aqua", Partial: "bg-amber/15 text-amber", Missing: "bg-rose/15 text-rose" };
   const sevCls = { High: "text-rose", Medium: "text-amber", Low: "text-mute" };
@@ -170,11 +171,18 @@ function Results({ r, onRestart }) {
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
           <div><h2 className="text-3xl font-semibold tracking-[-0.04em] md:text-5xl">Review this roadmap with a DU-NZO expert.</h2><p className="mt-3 text-void/80">Free 30 minute session. We validate your frameworks, scope and timeline.</p></div>
           {sent === "sent" ? <p className="rounded-2xl bg-void/15 p-5 font-semibold">Sent. DU-NZO will contact {email} shortly.</p> : (
-            <form onSubmit={send} className="flex flex-col gap-3 sm:flex-row" noValidate>
-              <label htmlFor="lp-email" className="sr-only">Work email</label>
-              <input id="lp-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="h-12 flex-1 rounded-full border border-void/20 bg-white/70 px-5 text-void placeholder:text-void/50 focus:outline-none focus:ring-2 focus:ring-void" />
-              <button className="btn bg-void text-ink hover:bg-night" disabled={sent === "sending"}>{sent === "sending" ? <Loader2 size={17} className="animate-spin" /> : "Send my roadmap"}</button>
-            </form>
+            <div className="flex flex-col gap-3">
+              <form onSubmit={send} className="flex flex-col gap-3 sm:flex-row" noValidate>
+                <label htmlFor="lp-email" className="sr-only">Work email</label>
+                <input id="lp-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="h-12 flex-1 rounded-full border border-void/20 bg-white/70 px-5 text-void placeholder:text-void/50 focus:outline-none focus:ring-2 focus:ring-void" />
+                <button className="btn bg-void text-ink hover:bg-night" disabled={sent === "sending"}>{sent === "sending" ? <Loader2 size={17} className="animate-spin" /> : "Send my roadmap"}</button>
+              </form>
+              <label className="flex cursor-pointer items-start gap-2 text-xs text-void/85">
+                <input type="checkbox" checked={mkt} onChange={(e) => setMkt(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#05060D]" />
+                <span>Send me DU-NZO updates and insights. I can unsubscribe anytime.</span>
+              </label>
+              <p className="text-[11px] leading-relaxed text-void/70">By submitting, you agree to our <Link to="/legal/privacy" className="font-semibold underline">Privacy Policy</Link>.</p>
+            </div>
           )}
         </div>
         {sent === "error" && <p className="mt-3 text-sm font-semibold">Enter a valid work email, or write to {BRAND.email}.</p>}

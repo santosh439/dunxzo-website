@@ -48,6 +48,7 @@ const Lead = z.object({
   planId: z.string().max(40).optional(),
   source: z.string().max(80).optional().default("contact"),
   summary: z.string().max(8000).optional().default(""),
+  marketing: z.boolean().optional().default(false),
 });
 
 const validate = (schema) => (req, res, next) => {

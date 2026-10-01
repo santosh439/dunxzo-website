@@ -46,6 +46,7 @@ export default function Footer() {
           <Link to="/legal/privacy" className="hover:text-ink">Privacy Policy</Link>
           <Link to="/legal/terms" className="hover:text-ink">Terms of Use</Link>
           <Link to="/legal/cookies" className="hover:text-ink">Cookie Policy</Link>
+          <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("dunzo:open-cookie-settings"))} className="focus-ring rounded hover:text-ink">Cookie settings</button>
           <Link to="/legal/disclaimer" className="hover:text-ink">Disclaimer</Link>
           <Link to="/trust-center" className="hover:text-ink">Trust Center</Link>
         </span>

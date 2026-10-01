@@ -90,6 +90,7 @@ class LeadInput(BaseModel):
     planId: Optional[str] = Field(None, max_length=40)
     source: Optional[str] = Field("contact", max_length=80)
     summary: Optional[str] = Field("", max_length=8000)
+    marketing: Optional[bool] = False
 
 
 def generate_plan(input_dict: dict) -> dict:
@@ -196,6 +197,7 @@ async def send_lead_notification(lead_dict: dict):
     message = html.escape(str(lead_dict.get("message", "")))
     summary = html.escape(str(lead_dict.get("summary", "")))
     plan_id = html.escape(str(lead_dict.get("planId", "")))
+    marketing = "Yes" if lead_dict.get("marketing") else "No"
 
     def row(k, v):
         if not v:
@@ -217,6 +219,7 @@ async def send_lead_notification(lead_dict: dict):
         f'{row("Size", size)}'
         f'{row("Frameworks", frameworks)}'
         f'{row("Source", source)}'
+        f'{row("Updates consent", marketing)}'
         f'{row("Message", message)}'
         f'{row("Summary", summary)}'
         f'{row("Plan ID", plan_id)}'
@@ -398,6 +401,7 @@ async def submit_lead(body: LeadInput, background_tasks: BackgroundTasks):
         "planId": body.planId or "",
         "source": body.source or "contact",
         "summary": body.summary or "",
+        "marketing": bool(body.marketing),
         "createdAt": now,
     }
     await leads_col.insert_one(record)

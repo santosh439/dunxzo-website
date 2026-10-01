@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Self-hosted Geist (no third-party font request is made before consent). */
+@font-face { font-family: "Geist"; src: url("/fonts/geist-300.woff2") format("woff2"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Geist"; src: url("/fonts/geist-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Geist"; src: url("/fonts/geist-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Geist"; src: url("/fonts/geist-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Geist"; src: url("/fonts/geist-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+
 :root { color-scheme: dark; }
 html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
 body { @apply bg-void text-ink font-sans antialiased; padding-bottom: env(safe-area-inset-bottom, 0px); }

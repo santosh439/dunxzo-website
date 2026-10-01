@@ -84,6 +84,7 @@ export async function notifyLead(lead) {
       ${row("Size", lead.size)}
       ${row("Frameworks", (lead.frameworks || []).join(", "))}
       ${row("Source", lead.source)}
+      ${row("Updates consent", lead.marketing ? "Yes" : "No")}
       ${row("Message", lead.message)}
       ${lead.summary ? row("Summary", lead.summary) : ""}
       ${lead.planId ? row("Plan ID", lead.planId) : ""}

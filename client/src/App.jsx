@@ -3,6 +3,7 @@ import { useEffect, lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
+import CookieConsent from "./components/CookieConsent.jsx";
 import Home from "./pages/Home.jsx";
 
 const Solution = lazy(() => import("./pages/Solution.jsx"));
@@ -93,6 +94,7 @@ export default function App() {
         </Suspense>
       </main>
       <Footer />
+      <CookieConsent />
     </div>
   );
 }

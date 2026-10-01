@@ -20,11 +20,12 @@ export default function TrustCenter() {
   useSeo("Trust Center", "How DU-NZO protects your data: security practices, privacy, subprocessors and document access.");
   const [form, setForm] = useState({ name: "", email: "", company: "" });
   const [state, setState] = useState("idle");
+  const [mkt, setMkt] = useState(false);
   const submit = async (e) => {
     e.preventDefault();
     if (!form.name || !/^\S+@\S+\.\S+$/.test(form.email)) return setState("error");
     setState("sending");
-    try { await api.sendLead({ ...form, source: "trust-center", message: "Trust Center document request" }); setState("sent"); } catch { setState("error"); }
+    try { await api.sendLead({ ...form, source: "trust-center", message: "Trust Center document request", marketing: mkt }); setState("sent"); } catch { setState("error"); }
   };
   return (
     <>
@@ -53,8 +54,13 @@ export default function TrustCenter() {
                 <div><label htmlFor="t-n" className="label">Full name</label><input id="t-n" className="field" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoComplete="name" /></div>
                 <div><label htmlFor="t-e" className="label">Work email</label><input id="t-e" type="email" className="field" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} autoComplete="email" /></div>
                 <div><label htmlFor="t-c" className="label">Company</label><input id="t-c" className="field" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} autoComplete="organization" /></div>
+                <label className="flex cursor-pointer items-start gap-3 text-sm text-mute">
+                  <input type="checkbox" checked={mkt} onChange={(e) => setMkt(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#8B7CFF]" />
+                  <span>Send me DU-NZO updates and insights. I can unsubscribe anytime.</span>
+                </label>
                 {state === "error" && <p role="alert" className="text-sm text-rose">Enter your name and a valid work email.</p>}
                 <button className="btn-glow" disabled={state === "sending"}>{state === "sending" ? <Loader2 size={17} className="animate-spin" /> : "Request documents"}</button>
+                <p className="text-xs text-mute">By submitting, you agree to our <Link to="/legal/privacy" className="underline">Privacy Policy</Link>.</p>
               </form>
             )}
           </div>
