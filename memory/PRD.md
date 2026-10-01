@@ -1,28 +1,49 @@
-# DU-NZO Website — PRD / Run Log
+# DU-NZO Platform — Project & Deployment Guide
 
-## Original problem statement
-Clone https://github.com/santosh439/dunxzo-website (branch main) and run it unchanged: React+Vite client, Express API server, shared engines. npm install → npm run build → npm start. Set strong ADMIN_TOKEN for /admin. Keep lead storage persistent. Show a preview.
+## Status: Preview Running & Ready for External Deploy
+- **Preview URL**: `https://c92d4991-7e6a-46a5-906e-ec749b4dce09.preview.emergentagent.com`
+- **Codebase**: Node.js monorepo (React + Vite client in `/client`, Express API in `/server`, shared rule engines in `/shared`). Kept completely original with no design or content changes.
 
-## Architecture (as run on this platform)
-- Repo lives at /app (already the cloned repo, commit 365c193).
-- Express server (server/src/index.js) serves built client (client/dist) + /api routes.
-- Platform ingress: non-/api → port 3000, /api → port 8001. Two supervisor programs run the same server:
-  - dunzo-web (PORT=3000, serves static site)
-  - dunzo-api (PORT=8001, serves /api)
-  Config: /etc/supervisor/conf.d/dunzo.conf (old frontend/backend template programs stopped/FATAL, harmless).
-- Env: /app/.env (ADMIN_TOKEN, NODE_ENV=production). Server loads via --env-file-if-exists.
-- Storage: MongoDB (local pod mongod, MONGO_URL=mongodb://localhost:27017, DB_NAME=dunzo). server/src/db.js rewritten to async MongoDB driver, same interface (createPlan/getPlan/updatePlan/listPlans/addLead/listLeads). Old JSON file store retired.
-- Email: Emergent-managed Resend via server/src/email.js (proxy https://integrations.emergentagent.com, EMERGENT_EMAIL_KEY, EMAIL_FROM_NAME=DU-NZO). notifyLead() emails every /api/leads submission (contact, trust-center, launchpad) to LEAD_NOTIFY_EMAIL=santosh@du-nzo.com. Fire-and-forget: mail failure never breaks submission.
-- Env: /app/.env (ADMIN_TOKEN, NODE_ENV, MONGO_URL, DB_NAME, EMERGENT_EMAIL_KEY, EMAIL_FROM_NAME, EMAIL_REPLY_TO, LEAD_NOTIFY_EMAIL).
+## Implemented Features
+1. **Full-stack Build & Run**:
+   - `npm install` (root, client, server)
+   - `npm run build` (builds Vite client to `client/dist`)
+   - `npm start` (Express server serves both the built static React site and the `/api` endpoints)
+2. **MongoDB Storage**:
+   - Swapped the former JSON file store in `server/src/db.js` for MongoDB (`mongodb` Node.js driver).
+   - Persists leads (`leads` collection) and compliance plans (`plans` collection).
+   - Keeps identical interface: `createPlan`, `getPlan`, `updatePlan`, `listPlans`, `addLead`, `listLeads`.
+3. **Email Notifications**:
+   - Implemented in `server/src/email.js`.
+   - Every lead submission through `/api/leads` (Contact Form, Trust Center request, and Startup Compliance Launchpad roadmap request) is emailed to `santosh@du-nzo.com`.
+   - Fire-and-forget: email issues will never block form submissions.
+4. **Admin Dashboard**:
+   - Route `/admin` is protected by `ADMIN_TOKEN`.
+   - Lists all captured leads and generated plans.
 
-## Implemented / verified (2026-10-01)
-- npm install (root + install:all) ✔, npm run build ✔ (client/dist built)
-- /api/health OK via external URL; homepage 200 and renders ✔
-- POST /api/leads, POST /api/plans ✔; /api/admin/leads with Bearer token ✔, wrong token → 401 ✔
-- Persistence across server restart ✔
-- /admin dashboard login with token shows leads/plans ✔ (screenshot verified)
+---
 
-## Backlog
-- P1: Deploy to production if requested (deployer pipeline).
-- P2: Optional MongoDB migration of db.js if multi-instance scaling is ever needed.
-- P2: Repo owner's "Before launch" items (placeholders in Trust Center/Legal, analytics) — out of scope unless asked.
+## Deploying to Railway / Render / DigitalOcean (Recommended)
+
+Because this is a pure Node.js Express + Vite app (single server serving frontend + API), it deploys in 1 click on platforms like **Railway** or **Render**.
+
+### Step 1: Push / Save to GitHub
+Click the **"Save to GitHub"** button in the top-right / chat input of your Emergent workspace to sync this repository to your GitHub account.
+
+### Step 2: Deploy on Railway (Fastest) or Render
+1. Create a new service from your GitHub repo.
+2. Build Command: `npm install && npm run build`
+3. Start Command: `npm start`
+4. Connect a MongoDB instance (e.g. Railway MongoDB plugin or MongoDB Atlas).
+
+### Step 3: Required Environment Variables
+Set these environment variables in your hosting provider's dashboard:
+- `ADMIN_TOKEN`: A strong secret string for accessing `/admin` (e.g., `8c6fc9942fc7f436da7e6b5a20afb7c2a912753da1c754e1`)
+- `NODE_ENV`: `production`
+- `PORT`: e.g. `4000` (or leave default assigned by host)
+- `MONGO_URL`: Your MongoDB connection URI (e.g., from MongoDB Atlas or Railway MongoDB)
+- `DB_NAME`: `dunzo`
+- `LEAD_NOTIFY_EMAIL`: `santosh@du-nzo.com`
+- `EMAIL_FROM_NAME`: `DU-NZO`
+- `EMAIL_REPLY_TO`: `santosh@du-nzo.com`
+- `EMERGENT_EMAIL_KEY`: `ek_1d2205c44988e39013fab34201dcc27d` (or replace with your own Resend/SendGrid key if self-hosting without the Emergent proxy)
