@@ -31,7 +31,12 @@ export default function NextActions({ actions }) {
                 {i + 1}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-p-ink">{a.title}</p>
+                <p className="truncate text-sm font-medium text-p-ink">
+                  {a.title}
+                  {a.fresh && (
+                    <span data-testid={`action-fresh-${a.id}`} className="ml-2 inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-p-aqua align-middle" title="New from Monitoring" />
+                  )}
+                </p>
                 <p className="mt-1 flex items-center gap-2 text-xs">
                   <span className="rounded-full border border-p-edge/10 bg-p-ink/5 px-2 py-0.5 font-medium text-p-mute">{a.framework}</span>
                   <span className={`inline-flex items-center gap-1 ${due.cls}`}>

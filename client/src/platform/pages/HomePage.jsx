@@ -1,10 +1,12 @@
 import { useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import TrustPulse from "../components/home/TrustPulse.jsx";
 import PostureSnapshot from "../components/home/PostureSnapshot.jsx";
 import NextActions from "../components/home/NextActions.jsx";
 import SideColumn from "../components/home/SideColumn.jsx";
 import { PULSE, FRAMEWORKS, ACTIONS, UPCOMING, ACTIVITY } from "../data/home.js";
+import { subscribe, getExtraActions } from "../store.js";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -12,6 +14,9 @@ const fadeUp = {
 };
 
 export default function HomePage() {
+  const extraActions = useSyncExternalStore(subscribe, getExtraActions);
+  const actions = [...extraActions, ...ACTIONS];
+
   useEffect(() => {
     document.title = "Home · DU-NZO Platform";
   }, []);
@@ -49,7 +54,7 @@ export default function HomePage() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <motion.div variants={fadeUp} className="lg:col-span-2">
-          <NextActions actions={ACTIONS} />
+          <NextActions actions={actions} />
         </motion.div>
         <motion.div variants={fadeUp}>
           <SideColumn upcoming={UPCOMING} activity={ACTIVITY} />

@@ -63,8 +63,14 @@ User decisions (2026-10-01): platform lives under `/app/*` route tree, isolated 
 - Deep links: ControlDrawer evidence rows → /app/evidence, risk rows → /app/risk (`drawer-evidence-link-N`, `drawer-risk-link-N`).
 - Verified: monitoring ack flow (4→3 open), evidence stale filter → 4 rows, policies light theme. Build clean.
 
+### Command 5 (DONE, 2026-10-01): Risk register + Vendors + Alert-to-Action
+- `platform/data/risk.js`: 10 MOCK risks (id/title/category/owner/likelihood/impact/status/controls[]/review) + `bandOf()` (≥15 critical, ≥10 high, ≥5 medium), registries BAND, RISK_STATUS (open/mitigating/accepted/closed); 8 MOCK vendors (tier/dataAccess/status/cert+certState valid|expiring|expired|none) + TIER, VENDOR_STATUS, CERT_STATE.
+- `RiskPage.jsx`: stat cards (total, critical+high, mitigating, open); 5×5 likelihood×impact HEAT MAP (cells colored by band with counts, click cell → filters table, clear chip); risk table (id, title+category, score badge + L×I, status chip, control chips, owner, review) with status chips + search.
+- `VendorsPage.jsx`: stats (total/critical tier/expired certs/under review); tier filter chips + search; table (vendor+category+next review, tier chip, data access, certificate with validity coloring, status chip, owner).
+- Alert-to-Action: `platform/store.js` — module-level store with `spawnAction/subscribe/getExtraActions`; MonitoringPage acknowledge() spawns an "Investigate drift: …" action (impact by severity, due Today); HomePage merges spawned actions (first) via useSyncExternalStore; NextActions shows a pulsing "new" dot for `fresh` actions. Deduped by id.
+- Verified: heat-cell 3×5 filter → 1 row + clear chip; vendors critical filter → 3 rows; ack alert al-2 → action-row-alert-al-2 on Home with fresh dot. Build clean.
+
 ### Remaining Commands (sequential, preview + approval gate after each)
-- C5: Risk register + Vendors
 - C6: Audit hub, GCC command center, Trust Center screens
 - C7: Copilot panel + command menu (Claude Sonnet 5 via Emergent LLM key — call integration_expert first)
 - C8: Real data — JWT auth, Mongo schemas, onboarding wizard (call integration_expert for auth before writing code)

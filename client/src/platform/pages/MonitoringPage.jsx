@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Radar, CheckCircle2, AlertTriangle, XCircle, Check } from "lucide-react";
 import { CHECKS, DRIFT_ALERTS, CHECK_STATUS, SEVERITY } from "../data/operations.js";
+import { spawnAction } from "../store.js";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -21,6 +22,8 @@ const STAT_META = [
   { key: "failing", label: "Failing", icon: XCircle, cls: "text-p-danger" },
 ];
 
+const IMPACT_BY_SEVERITY = { critical: 5, high: 4, medium: 3, low: 2 };
+
 export default function MonitoringPage() {
   const [acknowledged, setAcknowledged] = useState(() => new Set());
 
@@ -34,7 +37,22 @@ export default function MonitoringPage() {
     return s;
   }, []);
 
-  const acknowledge = (id) => setAcknowledged((prev) => new Set(prev).add(id));
+  const acknowledge = (id) => {
+    setAcknowledged((prev) => new Set(prev).add(id));
+    const alert = DRIFT_ALERTS.find((a) => a.id === id);
+    if (alert) {
+      spawnAction({
+        id: `alert-${alert.id}`,
+        title: `Investigate drift: ${alert.title}`,
+        framework: alert.control,
+        impact: IMPACT_BY_SEVERITY[alert.severity],
+        owner: "You",
+        due: "Today",
+        tone: "warning",
+        fresh: true,
+      });
+    }
+  };
 
   return (
     <motion.div
@@ -76,7 +94,7 @@ export default function MonitoringPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold tracking-tight">Drift alerts</h2>
-              <p className="mt-0.5 text-sm text-p-mute">Configuration and process drift detected across connected sources</p>
+              <p className="mt-0.5 text-sm text-p-mute">Acknowledging an alert adds a next best action on Home</p>
             </div>
             <span className="p-chip">{DRIFT_ALERTS.length - acknowledged.size} open</span>
           </div>
