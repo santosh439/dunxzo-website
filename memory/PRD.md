@@ -30,6 +30,27 @@ Remaining prompts: 1 overall premium polish (violet #8B7CFF + aqua #3EE0CF, 8px 
 - Fonts now self-hosted: Geist woff2 (300-700) in `client/public/fonts` + `frontend/public/fonts`, `@font-face` in index.css, Google Fonts links removed from both index.html. No third-party font request before consent. (User asked to be told — DONE.)
 - Verified desktop + 390px mobile (no horizontal overflow), cookie banner/prefs, amber placeholders, SEO title "Privacy Policy | DU-NZO".
 
+## DU-NZO Platform (SaaS) — 8-Command build — IN PROGRESS
+User decisions (2026-10-01): platform lives under `/app/*` route tree, isolated from marketing chrome; preview + STOP for approval after every Command; JWT custom auth (Command 8); Claude Sonnet 5 Copilot (Command 7); dark theme default with light/dark toggle; flat sidebar with exact section names.
+
+### Command 1 (DONE, 2026-10-01): Design system + app shell
+- Design tokens: `client/src/index.css` gains a `.dz-app`-scoped token block (dark default + `[data-theme="light"]` override): rgb-channel CSS vars `--p-bg/surface/elevated/edge/ink/mute/faint`, accents `--p-violet/-soft/-aqua`, semantic success/warning/danger/info, signature gradient `--p-grad`, card/pop shadows. Tailwind (`client/tailwind.config.js`): `p-*` colors via `rgb(var() / <alpha-value>)`, `p-sm/md/lg/xl` radius, `p-card/p-pop` shadows. Component classes: `.p-panel`, `.p-icon-btn`, `.p-chip`, `.p-text-gradient`. Marketing tokens untouched.
+- Routing: `App.jsx` early-returns `<PlatformApp />` (lazy) for `/app` or `/app/*`; marketing layout/footer/cookie banner never render inside the platform. PlatformApp uses its own `<Routes>` with ABSOLUTE paths (`/app`, `/app/controls`, …) — a standalone descendant Routes does not match `index`/relative paths without a parent `<Route>` (learned the hard way).
+- Shell (`client/src/platform/`): `PlatformApp.jsx` (theme state persisted to localStorage `dunzo.platform.theme`, default dark; mobile drawer state; collapsed state; footer status line "DU-NZO Platform · Preview v0.1 / Environment: Demo · Sample data"), `components/Sidebar.jsx` (fixed left, 264px, collapsible to 84px icon rail on lg, off-canvas + backdrop on mobile, Settings pinned at bottom), `components/Topbar.jsx` (sticky, global search with ⌘K focus shortcut, Demo Organization chip, theme toggle, bell, avatar), `components/SectionPage.jsx` (placeholder per section: command chip, H1, blurb, 3 skeleton stat cards, "ships in Command N" panel; sets `document.title = "<name> · DU-NZO Platform"`).
+- Nav (`platform/nav.js`): Home /app, Controls, Monitoring, Evidence, Policies, Risk register, Vendors, Audit hub, GCC command center, Trust Center + Settings — flat list, exact names, each with `command` number for the placeholder.
+- Verified: desktop dark + light, collapsed rail, mobile 390px off-canvas nav (no h-overflow), marketing site unchanged, `yarn build` passes. data-testids: platform-app, platform-sidebar/topbar/footer, nav-*, theme-toggle, global-search, org-switcher, notifications-button, user-menu-button, sidebar-collapse-toggle, mobile-menu-button, platform-page-*, command-chip-*, stat-card-*.
+- KNOWN ARTIFACT (not a bug): headless mobile screenshots paint the sticky topbar white despite correct computed styles (verified via elementFromPoint + inline-style test); desktop screenshots and real browsers render correctly.
+- GOTCHA: changing `frontend/tailwind.config.js` requires `sudo supervisorctl restart frontend` — the Vite dev server caches the Tailwind config (CSS @apply errors otherwise).
+
+### Remaining Commands (sequential, preview + approval gate after each)
+- C2: Home — Trust Pulse panel, posture snapshot, next best actions
+- C3: Controls — control library + control detail drawer
+- C4: Monitoring, Evidence, Policies screens
+- C5: Risk register + Vendors
+- C6: Audit hub, GCC command center, Trust Center screens
+- C7: Copilot panel + command menu (Claude Sonnet 5 via Emergent LLM key — call integration_expert first)
+- C8: Real data — JWT auth, Mongo schemas, onboarding wizard (call integration_expert for auth before writing code)
+
 ## Earlier (kept for reference)
 - **Codebase note**: Originally cloned Node monorepo; kept original design/content.
 

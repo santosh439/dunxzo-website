@@ -34,6 +34,7 @@ const Planner = lazy(() => import("./pages/Planner.jsx"));
 const PlanView = lazy(() => import("./pages/PlanView.jsx"));
 const Admin = lazy(() => import("./pages/Admin.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
+const PlatformApp = lazy(() => import("./platform/PlatformApp.jsx"));
 
 function ScrollManager() {
   const { pathname, hash } = useLocation();
@@ -50,6 +51,14 @@ function ScrollManager() {
 const Fallback = () => <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="animate-spin text-mute" aria-label="Loading" /></div>;
 
 export default function App() {
+  const { pathname } = useLocation();
+  if (pathname === "/app" || pathname.startsWith("/app/")) {
+    return (
+      <Suspense fallback={<Fallback />}>
+        <PlatformApp />
+      </Suspense>
+    );
+  }
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-void">Skip to content</a>
