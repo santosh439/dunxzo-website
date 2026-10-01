@@ -19,8 +19,9 @@
 - Icons: extended `components/Icon.jsx` lucide map (ScanSearch, CloudCog, Radar, Waypoints, Code2, CloudUpload, Router, LayoutGrid, MonitorSmartphone, DatabaseBackup, Headset, Server).
 - Verified in preview (desktop + 390px mobile): services index, vapt detail (frameworks covered), homepage section, 3-col mega menu, footer, contact topics. `yarn build` passes.
 
-## Phase 2 (NEXT, user-approved): design overhaul prompts 1-7
-Bold/distinctive hero; include light/dark toggle. Prompts: 1 overall premium polish (violet #8B7CFF + aqua #3EE0CF, 8px grid, refined cards), 2 world-class hero (animated gradient mesh, particle grid, 3D-tilt dashboard, trust points row), 3 custom SVG visuals (startup journey timeline, GCC 15-domain hub diagram, maturity staircase, framework icons), 4 motion (scroll reveal, hover lift, counters, glass sticky header, respect prefers-reduced-motion), 5 polish Launchpad/Platform/Framework pages, 6 mobile 390px + Lighthouse >90 + lazy load, 7 light/dark toggle with persistence. Rule: keep all text/pages/features identical; no fake claims/logos/stats.
+## Phase 2 (user-approved): design overhaul prompts 1-7 — IN PROGRESS
+Progress: **Prompt 2 (world-class hero) DONE 2026-10-01** — in `client/src/pages/Home.jsx` + `index.css`: animated conic gradient mesh + 3 drifting blobs, panning dot-grid, 8 floating particles, larger dashboard preview with macOS chrome, left icon rail, top reflection, deep shadow, pointer 3D tilt (gated by useReducedMotion), and a trust-points row (ISO/IEC 27001, SOC 2, DPDPA, ISO/IEC 42001) under the buttons. Headline/supporting text/buttons unchanged. Verified desktop tilt + 390px mobile.
+Remaining prompts: 1 overall premium polish (violet #8B7CFF + aqua #3EE0CF, 8px grid, refined cards), 3 custom SVG visuals (startup journey timeline, GCC 15-domain hub diagram, maturity staircase, framework icons), 4 motion (scroll reveal, hover lift, counters, glass sticky header, prefers-reduced-motion), 5 polish Launchpad/Platform/Framework pages, 6 mobile 390px + Lighthouse >90 + lazy load, 7 light/dark toggle with persistence. Rule: keep all text/pages/features identical; no fake claims/logos/stats.
 
 ## Earlier (kept for reference)
 - **Codebase note**: Originally cloned Node monorepo; kept original design/content.

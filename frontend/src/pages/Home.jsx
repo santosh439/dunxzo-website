@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Mail, ShieldCheck, Check, Globe2, Lock, FileText, BookOpen } from "lucide-react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
+import { ArrowRight, Mail, ShieldCheck, Check, Globe2, Lock, FileText, BookOpen, LayoutDashboard, FolderCheck, Gauge, Network } from "lucide-react";
 import { Aurora, Reveal, Spotlight, SectionHead, TypeBadge, CtaBand } from "../components/ui.jsx";
 import Icon from "../components/Icon.jsx";
 import DashboardMock from "../components/DashboardMock.jsx";
@@ -11,18 +11,72 @@ import { useSeo } from "../lib/seo.js";
 /* ---------------- Hero ---------------- */
 const STARTUP_STEPS = ["Launch", "Secure", "Comply", "Certify", "Build trust", "Scale"];
 const heroGcc = [3, 4, 2, 3, 4, 3, 4, 2, 3, 3, 2, 3, 2, 1, 3];
+const TRUST_POINTS = ["ISO/IEC 27001", "SOC 2", "DPDPA", "ISO/IEC 42001"];
+const HERO_PARTICLES = [
+  ["12%", "24%", "3px", "0s", "15s"], ["80%", "18%", "2px", "-4s", "18s"], ["30%", "72%", "2.5px", "-7s", "16s"],
+  ["66%", "62%", "2px", "-2s", "20s"], ["88%", "46%", "3px", "-9s", "14s"], ["46%", "10%", "2px", "-5s", "17s"],
+  ["18%", "50%", "2px", "-11s", "19s"], ["56%", "84%", "2.5px", "-3s", "15s"],
+];
+
+/* Pointer-tracked 3D tilt. Disabled when the visitor prefers reduced motion. */
+function Tilt({ children, className = "" }) {
+  const reduce = useReducedMotion();
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const srx = useSpring(rx, { stiffness: 140, damping: 16 });
+  const sry = useSpring(ry, { stiffness: 140, damping: 16 });
+  const move = (e) => {
+    if (reduce) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    ry.set(((e.clientX - r.left) / r.width - 0.5) * 9);
+    rx.set(-((e.clientY - r.top) / r.height - 0.5) * 9);
+  };
+  const reset = () => { rx.set(0); ry.set(0); };
+  return (
+    <div className={`tilt-scene ${className}`} onPointerMove={move} onPointerLeave={reset}>
+      <motion.div style={{ rotateX: srx, rotateY: sry, transformStyle: "preserve-3d" }} className="will-change-transform">{children}</motion.div>
+    </div>
+  );
+}
+
+/* Animated gradient mesh + dot grid + floating particles (pure CSS, GPU friendly). */
+function HeroBackdrop() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="hero-mesh" />
+      <div className="hero-blob left-[-12%] top-[-18%] h-[560px] w-[560px] bg-violet/40" />
+      <div className="hero-blob right-[-10%] top-[8%] h-[520px] w-[520px] bg-aqua/30 [animation-delay:-6s]" />
+      <div className="hero-blob left-[24%] top-[58%] h-[480px] w-[480px] bg-violet-deep/40 [animation-delay:-12s]" />
+      <div className="dot-grid absolute inset-0" />
+      <div className="absolute inset-0">
+        {HERO_PARTICLES.map(([l, t, s, delay, dur], i) => (
+          <span key={i} className="hero-particle" style={{ left: l, top: t, width: s, height: s, animationDelay: delay, animationDuration: dur }} />
+        ))}
+      </div>
+      <div className="grid-bg absolute inset-0" />
+    </div>
+  );
+}
 
 function HeroPreview({ mode }) {
   return (
-    <div className="glass relative rounded-[28px] p-4 shadow-[0_50px_120px_-30px_rgba(91,75,224,0.55)] md:p-6">
-      <div className="flex items-center justify-between border-b border-edge pb-4">
+    <div className="glass relative overflow-hidden rounded-[28px] shadow-[0_60px_140px_-30px_rgba(91,75,224,0.6)] ring-1 ring-white/10">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/10 to-transparent" aria-hidden="true" />
+      <div className="relative flex items-center justify-between border-b border-edge px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex gap-1.5"><span className="h-3 w-3 rounded-full bg-white/15" /><span className="h-3 w-3 rounded-full bg-white/15" /><span className="h-3 w-3 rounded-full bg-white/15" /></div>
+          <div className="flex gap-1.5"><span className="h-3 w-3 rounded-full bg-rose/70" /><span className="h-3 w-3 rounded-full bg-amber/70" /><span className="h-3 w-3 rounded-full bg-aqua/70" /></div>
           <span className="text-sm text-mute">{mode === "startup" ? "Your DU-NZO Compliance Roadmap" : "DU-NZO GCC Compliance Command Center"}</span>
         </div>
         <span className="hidden items-center gap-2 rounded-full bg-aqua/10 px-3 py-1 text-xs font-medium text-aqua sm:flex"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-aqua" />Sample</span>
       </div>
-      <AnimatePresence mode="wait">
+      <div className="relative flex">
+        <div className="hidden flex-col items-center gap-3 border-r border-edge px-3 py-5 md:flex" aria-hidden="true">
+          {[LayoutDashboard, ShieldCheck, FolderCheck, Gauge, Network].map((I, i) => (
+            <span key={i} className={`flex h-9 w-9 items-center justify-center rounded-lg ${i === 0 ? "bg-gradient-to-br from-violet to-aqua text-void" : "bg-white/[0.05] text-mute"}`}><I size={16} /></span>
+          ))}
+        </div>
+        <div className="min-w-0 flex-1 p-4 md:p-6">
+          <AnimatePresence mode="wait">
         {mode === "startup" ? (
           <motion.div key="s" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }} className="grid gap-4 pt-5 md:grid-cols-3">
             <div className="md:col-span-2">
@@ -65,7 +119,9 @@ function HeroPreview({ mode }) {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+          </AnimatePresence>
+        </div>
+      </div>
     </div>
   );
 }
@@ -74,7 +130,7 @@ function Hero() {
   const [mode, setMode] = useState("startup");
   return (
     <section className="noise relative overflow-hidden">
-      <Aurora />
+      <HeroBackdrop />
       <div className="container-x relative pb-20 pt-14 md:pb-28 md:pt-20">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center">
           <span className="kicker"><ShieldCheck size={15} className="text-aqua" />{BRAND.tagline}</span>
@@ -90,8 +146,13 @@ function Hero() {
           <Link to="/launchpad" className="btn-glow">Get Your Compliance Roadmap<ArrowRight size={17} /></Link>
           <a href={mailto("Talk to a DU-NZO expert")} className="btn-ghost"><Mail size={17} />Talk to an Expert</a>
         </motion.div>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.34 }} className="mt-9 flex flex-wrap items-center justify-center gap-2.5" aria-label="Frameworks DU-NZO works across">
+          {TRUST_POINTS.map((t) => (
+            <span key={t} className="inline-flex items-center gap-1.5 rounded-full border border-edge bg-white/[0.04] px-3.5 py-1.5 text-xs font-medium text-mute backdrop-blur"><ShieldCheck size={13} className="text-aqua" />{t}</span>
+          ))}
+        </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.35, ease: [0.2, 0.7, 0.2, 1] }} className="relative mx-auto mt-16 max-w-5xl">
+        <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.4, ease: [0.2, 0.7, 0.2, 1] }} className="relative mx-auto mt-14 max-w-6xl">
           <div className="mb-4 flex justify-center">
             <div className="inline-flex rounded-full border border-edge bg-white/[0.04] p-1" role="tablist" aria-label="Choose your journey">
               {[["startup", "I am a Startup"], ["gcc", "I run a GCC"]].map(([k, l]) => (
@@ -103,7 +164,7 @@ function Hero() {
             </div>
           </div>
           <div className="absolute -inset-px top-14 rounded-[28px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" aria-hidden="true" />
-          <HeroPreview mode={mode} />
+          <Tilt><HeroPreview mode={mode} /></Tilt>
         </motion.div>
       </div>
     </section>
