@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+body { @apply bg-void text-ink font-sans antialiased; padding-bottom: env(safe-area-inset-bottom, 0px); }
+::selection { background: rgba(139, 124, 255, 0.4); }
+
+@layer components {
+  .container-x { @apply mx-auto w-full max-w-7xl px-5 md:px-8; }
+  .glass { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+  .text-gradient { background: linear-gradient(100deg, #FFFFFF 0%, #B7ADFF 45%, #3EE0CF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .btn { @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full px-6 text-[15px] font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua focus-visible:ring-offset-2 focus-visible:ring-offset-void disabled:opacity-50; }
+  .btn-primary { @apply btn bg-ink text-void hover:bg-aqua-soft active:scale-[0.98]; }
+  .btn-glow { @apply btn text-void active:scale-[0.98]; background: linear-gradient(100deg, #B7ADFF, #3EE0CF); box-shadow: 0 10px 40px -10px rgba(62,224,207,0.6); }
+  .btn-ghost { @apply btn border border-edge bg-white/[0.03] text-ink hover:border-white/25 hover:bg-white/[0.06]; }
+  .chip { @apply inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua; }
+  .field { @apply h-12 w-full rounded-xl border border-edge bg-white/[0.04] px-4 text-[15px] text-ink placeholder:text-mute/60 transition focus:border-violet focus:bg-white/[0.06] focus:outline-none; }
+  .label { @apply mb-2 block text-sm font-medium text-ink/90; }
+  .h-display { @apply font-semibold tracking-tightest; line-height: 0.95; }
+  .h-section { @apply text-4xl font-semibold tracking-[-0.045em] md:text-6xl; line-height: 1.02; }
+  .kicker { @apply inline-flex items-center gap-2 rounded-full border border-edge bg-white/[0.04] px-3 py-1.5 text-sm text-mute; }
+  .focus-ring { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua focus-visible:ring-offset-2 focus-visible:ring-offset-void; }
+}
+
+.grid-bg {
+  background-image: linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%);
+}
+.noise::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .06; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.spotlight { position: relative; isolation: isolate; }
+.spotlight::before { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; opacity: 0; transition: opacity .3s; background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(139,124,255,0.18), transparent 45%); }
+.spotlight:hover::before { opacity: 1; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .no-print { display: none !important; }
+  .print-plain { background: #fff !important; color: #000 !important; border-color: #ccc !important; box-shadow: none !important; }
+  .print-plain * { color: #000 !important; }
+}
+.grid > * { min-width: 0; }
