@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
-import { Search, Bell, Sun, Moon, Menu, PanelLeftClose, PanelLeftOpen, ChevronDown } from "lucide-react";
+import { Search, Bell, Sun, Moon, Menu, PanelLeftClose, PanelLeftOpen, ChevronDown, Sparkles } from "lucide-react";
 
-export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollapse, onOpenMobile }) {
+export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollapse, onOpenMobile, onOpenMenu, onOpenCopilot }) {
   const searchRef = useRef(null);
 
   useEffect(() => {
     const onKey = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
         e.preventDefault();
         searchRef.current?.focus();
       }
@@ -32,19 +32,28 @@ export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollap
 
         <div className="relative w-full max-w-md">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-p-faint" />
-          <input
-            ref={searchRef}
-            type="search"
+          <button
+            type="button"
+            onClick={onOpenMenu}
             data-testid="global-search"
-            placeholder="Search controls, evidence, risks…"
-            className="h-10 w-full rounded-full border border-p-edge/10 bg-p-ink/5 pl-10 pr-14 text-sm text-p-ink transition placeholder:text-p-faint focus:border-p-violet/50 focus:bg-p-ink/[0.07] focus:outline-none focus:ring-2 focus:ring-p-violet/25"
-          />
+            className="flex h-10 w-full items-center rounded-full border border-p-edge/10 bg-p-ink/5 pl-10 pr-14 text-left text-sm text-p-faint transition hover:bg-p-ink/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-violet/25"
+          >
+            Search or jump to…
+          </button>
           <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-p-edge/15 bg-p-ink/5 px-1.5 py-0.5 text-[11px] font-medium text-p-faint sm:block">
             ⌘K
           </kbd>
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
+          <button
+            onClick={onOpenCopilot}
+            data-testid="copilot-open-button"
+            className="inline-flex items-center gap-2 rounded-full border border-p-violet/30 bg-p-violet/10 py-2 pl-3 pr-3.5 text-sm font-semibold text-p-violet transition hover:bg-p-violet/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span className="hidden sm:inline">Copilot</span>
+          </button>
           <button
             data-testid="org-switcher"
             className="hidden items-center gap-2 rounded-full border border-p-edge/10 bg-p-ink/5 py-2 pl-3.5 pr-2.5 text-sm font-medium text-p-mute transition hover:text-p-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua md:flex"

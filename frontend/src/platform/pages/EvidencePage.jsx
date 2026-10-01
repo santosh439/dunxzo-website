@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Search, Download, FileText, FolderCheck, FileWarning, Inbox } from "lucide-react";
 import { EVIDENCE_ITEMS, EVIDENCE_REQUESTS } from "../data/operations.js";
 import { FRESHNESS as FRESHNESS_ITEMS } from "../data/controls.js";
+import { downloadAuditPack } from "../lib/auditPack.js";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -56,6 +57,7 @@ export default function EvidencePage() {
           </p>
         </div>
         <button
+          onClick={downloadAuditPack}
           data-testid="export-audit-pack"
           className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua"
           style={{ background: "var(--p-grad)" }}

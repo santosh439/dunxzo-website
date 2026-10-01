@@ -78,8 +78,15 @@ User decisions (2026-10-01): platform lives under `/app/*` route tree, isolated 
 - Risk drawer: `platform/data/risk.js` RISKS enriched with description/treatment/plan[]/residual + TREATMENT registry; `components/risk/RiskDrawer.jsx` (inherent→residual score blocks, treatment plan steps, treating-control links → /app/controls, Accept residual → status accepted). RiskPage rows now buttons opening the drawer; `risks` in local state.
 - Verified: risk drawer open/plan/control-link/Escape; audit submit; GCC 15 domains + entity switch (Guadalajara scores shift); trust approve + light theme. Build clean.
 
+### Command 7 (DONE, 2026-10-01): AI Copilot + command menu + audit-pack export
+- Backend (FastAPI preview `/app/backend/server.py`): `POST /api/copilot/chat` SSE streaming via emergentintegrations LlmChat, model `("anthropic","claude-sonnet-5")`, compliance system prompt, stateful across requests by replaying last 8 turns from Mongo `copilot_messages`; `GET /api/copilot/history/{session_id}`. Key: `EMERGENT_LLM_KEY` appended to backend/.env. Verified live streaming via curl + browser.
+- Frontend `components/CopilotPanel.jsx`: right slide-in chat, 4 suggestion chips, streaming fetch+ReadableStream parse of `data: {delta|error|done}`, localStorage session id `dunzo.copilot.session`, textarea (Enter sends, Shift+Enter newline). Uses RELATIVE `/api` (Vite proxy → :8001); do NOT use process.env in the Vite client (throws in browser).
+- Frontend `components/CommandMenu.jsx`: ⌘K palette (nav to every section + "Ask the Copilot"), arrow-key nav, Enter, Escape, filter.
+- Topbar: ⌘K / the search box opens the command menu (search box is now a button; `/` focuses nothing now — repurposed); Copilot button (`copilot-open-button`); ⌘J toggles Copilot. Wired in PlatformApp with copilotOpen/menuOpen state.
+- Export: `lib/auditPack.js` `downloadAuditPack()` builds a styled HTML pack (evidence + policies + findings) and downloads `dunzo-audit-pack-YYYY-MM-DD.html`; wired to EvidencePage "Export audit pack". Verified download.
+- NOTE: Copilot endpoint exists only in the FastAPI preview backend. The canonical Express app (`/app/server`, GitHub production) does NOT yet have a Node equivalent — needs porting before production deploy.
+
 ### Remaining Commands (sequential, preview + approval gate after each)
-- C7: Copilot panel + command menu (Claude Sonnet 5 via Emergent LLM key — call integration_expert first)
 - C8: Real data — JWT auth, Mongo schemas, onboarding wizard (call integration_expert for auth before writing code)
 
 ## Earlier (kept for reference)

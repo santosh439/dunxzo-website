@@ -14,8 +14,10 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException, Response, BackgroundTasks, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
+from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -46,6 +48,22 @@ mongo_client = AsyncIOMotorClient(MONGO_URL)
 db = mongo_client[DB_NAME]
 plans_col = db["plans"]
 leads_col = db["leads"]
+copilot_col = db["copilot_messages"]
+
+EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
+COPILOT_MODEL = ("anthropic", "claude-sonnet-5")
+COPILOT_SYSTEM = (
+    "You are the DU-NZO Copilot, an AI assistant embedded in the DU-NZO compliance platform. "
+    "DU-NZO helps startups and global capability centers achieve and maintain compliance across "
+    "ISO/IEC 27001, SOC 2, DPDPA (India's Data Protection Act 2023), and ISO/IEC 42001 (AI governance). "
+    "The platform tracks controls, continuous monitoring, evidence, policies, a risk register, vendors, "
+    "an audit hub, a GCC command center and a public Trust Center. "
+    "Help the user understand their compliance posture, draft policies, explain controls and frameworks, "
+    "prioritise remediation, and prepare for audits. Be concise, practical and specific to the compliance domain. "
+    "Use short paragraphs and bullet lists. When you reference a control, use its ID (e.g. A.5.15, CC6.1, DPDP-4). "
+    "You are working with demo/sample data in this preview; never invent specific private customer data, and if "
+    "asked for live figures, clarify that this is a sample workspace."
+)
 
 
 @app.on_event("startup")
@@ -91,6 +109,11 @@ class LeadInput(BaseModel):
     source: Optional[str] = Field("contact", max_length=80)
     summary: Optional[str] = Field("", max_length=8000)
     marketing: Optional[bool] = False
+
+
+class CopilotInput(BaseModel):
+    session_id: str = Field(..., min_length=1, max_length=80)
+    message: str = Field(..., min_length=1, max_length=4000)
 
 
 def generate_plan(input_dict: dict) -> dict:
@@ -255,6 +278,63 @@ async def send_lead_notification(lead_dict: dict):
 @app.get("/api/health")
 async def health():
     return {"ok": True}
+
+
+@app.get("/api/copilot/history/{session_id}")
+async def copilot_history(session_id: str):
+    cursor = copilot_col.find({"session_id": session_id}, {"_id": 0, "role": 1, "content": 1, "createdAt": 1}).sort("createdAt", 1)
+    return await cursor.to_list(length=200)
+
+
+@app.post("/api/copilot/chat")
+async def copilot_chat(body: CopilotInput):
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(status_code=503, detail="Copilot is not configured")
+
+    now = datetime.now(timezone.utc).isoformat()
+    await copilot_col.insert_one({"session_id": body.session_id, "role": "user", "content": body.message, "createdAt": now})
+
+    # Rebuild chat with prior history so the conversation is stateful across requests.
+    history = await copilot_col.find({"session_id": body.session_id}, {"_id": 0, "role": 1, "content": 1}).sort("createdAt", 1).to_list(length=200)
+
+    chat = LlmChat(
+        api_key=EMERGENT_LLM_KEY,
+        session_id=body.session_id,
+        system_message=COPILOT_SYSTEM,
+    ).with_model(*COPILOT_MODEL)
+
+    # Feed prior turns (excluding the just-added user message) as context.
+    context = history[:-1]
+    context_text = ""
+    if context:
+        lines = [f"{m['role'].upper()}: {m['content']}" for m in context[-8:]]
+        context_text = "Here is the recent conversation so far:\n" + "\n".join(lines) + "\n\nNow answer the latest question.\n\n"
+
+    async def event_generator():
+        collected = []
+        try:
+            async for event in chat.stream_message(UserMessage(text=context_text + body.message)):
+                if isinstance(event, TextDelta):
+                    collected.append(event.content)
+                    yield f"data: {json.dumps({'delta': event.content})}\n\n"
+                elif isinstance(event, StreamDone):
+                    break
+        except Exception as e:
+            logger.error(f"Copilot stream error: {e}")
+            yield f"data: {json.dumps({'error': 'Copilot ran into an issue. Please try again.'})}\n\n"
+        full = "".join(collected)
+        if full:
+            await copilot_col.insert_one({
+                "session_id": body.session_id, "role": "assistant", "content": full,
+                "createdAt": datetime.now(timezone.utc).isoformat(),
+            })
+        yield f"data: {json.dumps({'done': True})}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @app.post("/api/plans/preview")

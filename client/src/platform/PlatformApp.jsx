@@ -13,6 +13,8 @@ import VendorsPage from "./pages/VendorsPage.jsx";
 import AuditPage from "./pages/AuditPage.jsx";
 import GccPage from "./pages/GccPage.jsx";
 import TrustCenterPage from "./pages/TrustCenterPage.jsx";
+import CopilotPanel from "./components/CopilotPanel.jsx";
+import CommandMenu from "./components/CommandMenu.jsx";
 import { SECTIONS, SETTINGS_SECTION } from "./nav.js";
 
 const THEME_KEY = "dunzo.platform.theme";
@@ -23,6 +25,8 @@ export default function PlatformApp() {
   });
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [copilotOpen, setCopilotOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -33,6 +37,15 @@ export default function PlatformApp() {
     setMobileOpen(false);
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setMenuOpen(true); }
+      else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") { e.preventDefault(); setCopilotOpen((v) => !v); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <div className="dz-app min-h-screen bg-p-bg font-sans text-p-ink antialiased" data-theme={theme} data-testid="platform-app">
@@ -47,6 +60,8 @@ export default function PlatformApp() {
           collapsed={collapsed}
           onToggleCollapse={() => setCollapsed((c) => !c)}
           onOpenMobile={() => setMobileOpen(true)}
+          onOpenMenu={() => setMenuOpen(true)}
+          onOpenCopilot={() => setCopilotOpen(true)}
         />
         <main id="p-main" className="flex-1">
           <div className="mx-auto w-full max-w-[1200px] px-5 py-8 md:px-8 md:py-10">
@@ -73,6 +88,8 @@ export default function PlatformApp() {
           </div>
         </footer>
       </div>
+      <CommandMenu open={menuOpen} onClose={() => setMenuOpen(false)} onOpenCopilot={() => setCopilotOpen(true)} />
+      <CopilotPanel open={copilotOpen} onClose={() => setCopilotOpen(false)} />
     </div>
   );
 }
