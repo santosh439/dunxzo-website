@@ -42,8 +42,13 @@ User decisions (2026-10-01): platform lives under `/app/*` route tree, isolated 
 - KNOWN ARTIFACT (not a bug): headless mobile screenshots paint the sticky topbar white despite correct computed styles (verified via elementFromPoint + inline-style test); desktop screenshots and real browsers render correctly.
 - GOTCHA: changing `frontend/tailwind.config.js` requires `sudo supervisorctl restart frontend` — the Vite dev server caches the Tailwind config (CSS @apply errors otherwise).
 
+### Command 2 (DONE, 2026-10-01): Home dashboard
+- `platform/data/home.js`: MOCK data module (PULSE score 82/+4, 4 pillars, FRAMEWORKS x4 with status/progress/controls/meta, ACTIONS x5 ranked, UPCOMING x3, ACTIVITY x4). Replaced by real API in Command 8.
+- `platform/pages/HomePage.jsx`: greeting header (time-aware + date), staggered framer-motion reveals. Components in `platform/components/home/`: `PulseGauge.jsx` (SVG radial gauge, gradient stroke, animated strokeDashoffset, glow), `TrustPulse.jsx` (gauge + +4 delta chip + 4 animated pillar bars + "What moved your score" delta list), `PostureSnapshot.jsx` (4 framework cards: status chip on-track/attention/early, animated gradient progress, controls count, meta), `NextActions.jsx` (ranked rows: rank, title, framework chip, due tone danger/warning/neutral, +N Pulse impact chip, owner avatar, Start button), `SideColumn.jsx` (Upcoming deadlines + Recent activity timeline).
+- Marketing navbar: subtle "Platform login" text link → /app (desktop right cluster + mobile menu, `navbar-platform-login` / `mobile-platform-login`; `shrink-0 whitespace-nowrap` to prevent wrap).
+- Verified: all testids present, dark + light, bottom row scroll, navbar desktop/mobile, `yarn build` clean.
+
 ### Remaining Commands (sequential, preview + approval gate after each)
-- C2: Home — Trust Pulse panel, posture snapshot, next best actions
 - C3: Controls — control library + control detail drawer
 - C4: Monitoring, Evidence, Policies screens
 - C5: Risk register + Vendors

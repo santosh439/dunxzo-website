@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar.jsx";
 import Topbar from "./components/Topbar.jsx";
 import SectionPage from "./components/SectionPage.jsx";
+import HomePage from "./pages/HomePage.jsx";
 import { SECTIONS, SETTINGS_SECTION } from "./nav.js";
 
 const THEME_KEY = "dunzo.platform.theme";
@@ -41,7 +42,7 @@ export default function PlatformApp() {
         <main id="p-main" className="flex-1">
           <div className="mx-auto w-full max-w-[1200px] px-5 py-8 md:px-8 md:py-10">
             <Routes>
-              <Route path="/app" element={<SectionPage section={SECTIONS[0]} />} />
+              <Route path="/app" element={<HomePage />} />
               {SECTIONS.slice(1).map((s) => (
                 <Route key={s.slug} path={s.path} element={<SectionPage section={s} />} />
               ))}

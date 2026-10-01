@@ -100,7 +100,8 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
-            <a href={mailto("Talk to a DU-NZO expert")} className="focus-ring rounded-full px-3 py-2 text-sm text-mute hover:text-ink">Talk to an Expert</a>
+            <Link to="/app" data-testid="navbar-platform-login" className="focus-ring shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-sm text-mute hover:text-ink">Platform login</Link>
+            <a href={mailto("Talk to a DU-NZO expert")} className="focus-ring shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-sm text-mute hover:text-ink">Talk to an Expert</a>
             <Link to="/launchpad" className="btn-glow !min-h-[42px] !px-5 text-sm">Get Your Roadmap</Link>
           </div>
 
@@ -153,6 +154,7 @@ export default function Navbar() {
               ))}
               <Link to="/launchpad" className="btn-glow mt-6">Get Your Compliance Roadmap</Link>
               <a href={mailto("Talk to a DU-NZO expert")} className="btn-ghost mt-3"><Mail size={17} />Talk to an Expert</a>
+              <Link to="/app" data-testid="mobile-platform-login" className="mt-4 block py-2 text-center text-sm text-mute hover:text-ink">Platform login</Link>
             </div>
           </motion.div>
         )}
