@@ -48,8 +48,14 @@ User decisions (2026-10-01): platform lives under `/app/*` route tree, isolated 
 - Marketing navbar: subtle "Platform login" text link → /app (desktop right cluster + mobile menu, `navbar-platform-login` / `mobile-platform-login`; `shrink-0 whitespace-nowrap` to prevent wrap).
 - Verified: all testids present, dark + light, bottom row scroll, navbar desktop/mobile, `yarn build` clean.
 
+### Command 3 (DONE, 2026-10-01): Controls library + detail drawer
+- `platform/data/controls.js`: 18 MOCK controls across ISO 27001 (A.x), SOC 2 (CCx.x), DPDPA, ISO 42001 with id/title/domain/frameworks/owner/status/automation/lastTested/nextReview/description/evidence[]/risks[]; registries CONTROL_STATUS (operational/attention/missing/draft), FRESHNESS (fresh/stale/missing), OWNERS; `evidenceState()` derives worst freshness.
+- `platform/pages/ControlsPage.jsx`: header + 4 clickable stat cards (toggle status filter), search (id/title/domain), framework + status filter chips, empty state with clear-filters; `markReviewed` updates local mock state (status → operational, lastTested "Just now").
+- `platform/components/controls/ControlsTable.jsx`: grid table (Control ID chip + title + domain, framework chips, owner avatar, evidence count + freshness dot, status chip, chevron); min-w 820px with horizontal scroll.
+- `platform/components/controls/ControlDrawer.jsx`: right slide-in drawer (framer-motion, backdrop, Escape, role=dialog): status + description, meta grid (owner/automation/last tested/next review), frameworks chips, evidence list with freshness + dashed Upload evidence button, related risks with severity dots, footer "Mark as reviewed" (gradient) + Edit.
+- Verified: DPDPA filter → 3 rows, search narrows to 1, drawer open/mark-reviewed/Escape close, light theme. `yarn build` clean.
+
 ### Remaining Commands (sequential, preview + approval gate after each)
-- C3: Controls — control library + control detail drawer
 - C4: Monitoring, Evidence, Policies screens
 - C5: Risk register + Vendors
 - C6: Audit hub, GCC command center, Trust Center screens
