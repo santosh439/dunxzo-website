@@ -7,7 +7,8 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { db } from "./db.js";
+import { db, connectDb } from "./db.js";
+import { notifyLead } from "./email.js";
 import { generatePlan, progressOf } from "../../shared/planEngine.js";
 
 const app = express();
@@ -72,63 +73,80 @@ app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
 app.post("/api/plans/preview", validate(PlanInput), (req, res) => res.json({ plan: generatePlan(req.valid) }));
 
-app.post("/api/plans", validate(PlanInput), (req, res) => {
-  const now = new Date().toISOString();
-  const rec = db.createPlan({ id: newId(), plan: generatePlan(req.valid), done: [], createdAt: now, updatedAt: now });
-  res.status(201).json(view(rec));
+app.post("/api/plans", validate(PlanInput), async (req, res, next) => {
+  try {
+    const now = new Date().toISOString();
+    const rec = await db.createPlan({ id: newId(), plan: generatePlan(req.valid), done: [], createdAt: now, updatedAt: now });
+    res.status(201).json(view(rec));
+  } catch (e) { next(e); }
 });
 
-app.get("/api/plans/:id", (req, res) => {
-  const rec = db.getPlan(req.params.id);
-  if (!rec) return res.status(404).json({ error: "Plan not found" });
-  res.json(view(rec));
+app.get("/api/plans/:id", async (req, res, next) => {
+  try {
+    const rec = await db.getPlan(req.params.id);
+    if (!rec) return res.status(404).json({ error: "Plan not found" });
+    res.json(view(rec));
+  } catch (e) { next(e); }
 });
 
-app.patch("/api/plans/:id/tasks", validate(z.object({ taskId: z.string().max(60), done: z.boolean() })), (req, res) => {
-  const rec = db.getPlan(req.params.id);
-  if (!rec) return res.status(404).json({ error: "Plan not found" });
-  const known = rec.plan.phases.some((p) => p.tasks.some((t) => t.id === req.valid.taskId));
-  if (!known) return res.status(400).json({ error: "Unknown task" });
-  const set = new Set(rec.done);
-  if (req.valid.done) set.add(req.valid.taskId); else set.delete(req.valid.taskId);
-  res.json(view(db.updatePlan(rec.id, { done: [...set] })));
+app.patch("/api/plans/:id/tasks", validate(z.object({ taskId: z.string().max(60), done: z.boolean() })), async (req, res, next) => {
+  try {
+    const rec = await db.getPlan(req.params.id);
+    if (!rec) return res.status(404).json({ error: "Plan not found" });
+    const known = rec.plan.phases.some((p) => p.tasks.some((t) => t.id === req.valid.taskId));
+    if (!known) return res.status(400).json({ error: "Unknown task" });
+    const set = new Set(rec.done);
+    if (req.valid.done) set.add(req.valid.taskId); else set.delete(req.valid.taskId);
+    res.json(view(await db.updatePlan(rec.id, { done: [...set] })));
+  } catch (e) { next(e); }
 });
 
 const csvCell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-app.get("/api/plans/:id/export.csv", (req, res) => {
-  const rec = db.getPlan(req.params.id);
-  if (!rec) return res.status(404).json({ error: "Plan not found" });
-  const done = new Set(rec.done);
-  const rows = [["Phase", "Task", "Owner", "Reference", "Deliverable", "Start", "End", "Status"]];
-  for (const p of rec.plan.phases) for (const t of p.tasks) rows.push([p.name, t.title, t.owner, t.ref, t.deliverable, p.startDate, p.endDate, done.has(t.id) ? "Done" : "Open"]);
-  res.setHeader("Content-Type", "text/csv; charset=utf-8");
-  res.setHeader("Content-Disposition", `attachment; filename="iso-plan-${rec.id}.csv"`);
-  res.send(rows.map((r) => r.map(csvCell).join(",")).join("\r\n"));
+app.get("/api/plans/:id/export.csv", async (req, res, next) => {
+  try {
+    const rec = await db.getPlan(req.params.id);
+    if (!rec) return res.status(404).json({ error: "Plan not found" });
+    const done = new Set(rec.done);
+    const rows = [["Phase", "Task", "Owner", "Reference", "Deliverable", "Start", "End", "Status"]];
+    for (const p of rec.plan.phases) for (const t of p.tasks) rows.push([p.name, t.title, t.owner, t.ref, t.deliverable, p.startDate, p.endDate, done.has(t.id) ? "Done" : "Open"]);
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="iso-plan-${rec.id}.csv"`);
+    res.send(rows.map((r) => r.map(csvCell).join(",")).join("\r\n"));
+  } catch (e) { next(e); }
 });
 
-app.get("/api/plans/:id/milestones.ics", (req, res) => {
-  const rec = db.getPlan(req.params.id);
-  if (!rec) return res.status(404).json({ error: "Plan not found" });
-  const d = (s) => s.replace(/-/g, "");
-  const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
-  const events = rec.plan.milestones.map((m) => [
-    "BEGIN:VEVENT", `UID:${rec.id}-${m.id}@du-nzo.com`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d(m.date)}`,
-    `SUMMARY:${m.name}${m.estimate ? " (estimate)" : ""}`, "END:VEVENT",
-  ].join("\r\n"));
-  res.setHeader("Content-Type", "text/calendar; charset=utf-8");
-  res.setHeader("Content-Disposition", `attachment; filename="iso-milestones-${rec.id}.ics"`);
-  res.send(["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//DU-NZO//ISO Planner//EN", ...events, "END:VCALENDAR"].join("\r\n"));
+app.get("/api/plans/:id/milestones.ics", async (req, res, next) => {
+  try {
+    const rec = await db.getPlan(req.params.id);
+    if (!rec) return res.status(404).json({ error: "Plan not found" });
+    const d = (s) => s.replace(/-/g, "");
+    const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
+    const events = rec.plan.milestones.map((m) => [
+      "BEGIN:VEVENT", `UID:${rec.id}-${m.id}@du-nzo.com`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d(m.date)}`,
+      `SUMMARY:${m.name}${m.estimate ? " (estimate)" : ""}`, "END:VEVENT",
+    ].join("\r\n"));
+    res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="iso-milestones-${rec.id}.ics"`);
+    res.send(["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//DU-NZO//ISO Planner//EN", ...events, "END:VCALENDAR"].join("\r\n"));
+  } catch (e) { next(e); }
 });
 
-app.post("/api/leads", rateLimit({ windowMs: 60_000, limit: 5 }), validate(Lead), (req, res) => {
-  const lead = db.addLead({ id: newId(), ...req.valid, createdAt: new Date().toISOString() });
-  // Hook point: send a notification email or push the lead to your CRM here.
-  res.status(201).json({ ok: true, id: lead.id });
+app.post("/api/leads", rateLimit({ windowMs: 60_000, limit: 5 }), validate(Lead), async (req, res, next) => {
+  try {
+    const lead = await db.addLead({ id: newId(), ...req.valid, createdAt: new Date().toISOString() });
+    // Email the lead to the DU-NZO inbox; never let a mail failure break the submission.
+    notifyLead(lead).catch((err) => console.error("Lead notification failed:", err.message));
+    res.status(201).json({ ok: true, id: lead.id });
+  } catch (e) { next(e); }
 });
 
 /* Admin API */
-app.get("/api/admin/leads", requireAdmin, (_req, res) => res.json(db.listLeads()));
-app.get("/api/admin/plans", requireAdmin, (_req, res) => res.json(db.listPlans()));
+app.get("/api/admin/leads", requireAdmin, async (_req, res, next) => {
+  try { res.json(await db.listLeads()); } catch (e) { next(e); }
+});
+app.get("/api/admin/plans", requireAdmin, async (_req, res, next) => {
+  try { res.json(await db.listPlans()); } catch (e) { next(e); }
+});
 
 app.use("/api", (_req, res) => res.status(404).json({ error: "Not found" }));
 
@@ -144,4 +162,5 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: "Something went wrong on the server" });
 });
 
+await connectDb();
 app.listen(PORT, () => console.log(`API ready on http://localhost:${PORT}`));

@@ -11,7 +11,9 @@ Clone https://github.com/santosh439/dunxzo-website (branch main) and run it unch
   - dunzo-api (PORT=8001, serves /api)
   Config: /etc/supervisor/conf.d/dunzo.conf (old frontend/backend template programs stopped/FATAL, harmless).
 - Env: /app/.env (ADMIN_TOKEN, NODE_ENV=production). Server loads via --env-file-if-exists.
-- Storage: JSON file store at /app/server/data/db.json (persistent on pod disk, survives restarts — verified). No MongoDB migration needed.
+- Storage: MongoDB (local pod mongod, MONGO_URL=mongodb://localhost:27017, DB_NAME=dunzo). server/src/db.js rewritten to async MongoDB driver, same interface (createPlan/getPlan/updatePlan/listPlans/addLead/listLeads). Old JSON file store retired.
+- Email: Emergent-managed Resend via server/src/email.js (proxy https://integrations.emergentagent.com, EMERGENT_EMAIL_KEY, EMAIL_FROM_NAME=DU-NZO). notifyLead() emails every /api/leads submission (contact, trust-center, launchpad) to LEAD_NOTIFY_EMAIL=santosh@du-nzo.com. Fire-and-forget: mail failure never breaks submission.
+- Env: /app/.env (ADMIN_TOKEN, NODE_ENV, MONGO_URL, DB_NAME, EMERGENT_EMAIL_KEY, EMAIL_FROM_NAME, EMAIL_REPLY_TO, LEAD_NOTIFY_EMAIL).
 
 ## Implemented / verified (2026-10-01)
 - npm install (root + install:all) ✔, npm run build ✔ (client/dist built)
