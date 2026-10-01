@@ -4,6 +4,9 @@ import { Search, ShieldCheck, AlertTriangle, FileWarning, FileEdit } from "lucid
 import ControlsTable from "../components/controls/ControlsTable.jsx";
 import ControlDrawer from "../components/controls/ControlDrawer.jsx";
 import { CONTROLS, CONTROL_STATUS, FRAMEWORK_FILTERS } from "../data/controls.js";
+import { useWorkspace } from "../context/WorkspaceContext.jsx";
+
+const CONTROL_BY_ID = Object.fromEntries(CONTROLS.map((c) => [c.id, c]));
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -18,7 +21,7 @@ const STAT_META = [
 ];
 
 export default function ControlsPage() {
-  const [controls, setControls] = useState(CONTROLS);
+  const { data, reviewControl } = useWorkspace();
   const [query, setQuery] = useState("");
   const [framework, setFramework] = useState("All");
   const [status, setStatus] = useState("All");
@@ -28,9 +31,16 @@ export default function ControlsPage() {
     document.title = "Controls · DU-NZO Platform";
   }, []);
 
+  // Merge live workspace status/owner with the rich display template fields by id.
+  const controls = useMemo(() => {
+    const source = data?.controls;
+    if (!source) return [];
+    return source.map((c) => ({ ...(CONTROL_BY_ID[c.id] || {}), ...c }));
+  }, [data]);
+
   const stats = useMemo(() => {
     const s = { operational: 0, attention: 0, missing: 0, draft: 0 };
-    controls.forEach((c) => s[c.status]++);
+    controls.forEach((c) => { if (s[c.status] != null) s[c.status]++; });
     return s;
   }, [controls]);
 
@@ -40,14 +50,15 @@ export default function ControlsPage() {
       (c) =>
         (framework === "All" || c.frameworks.includes(framework)) &&
         (status === "All" || c.status === status) &&
-        (!q || c.id.toLowerCase().includes(q) || c.title.toLowerCase().includes(q) || c.domain.toLowerCase().includes(q))
+        (!q || c.id.toLowerCase().includes(q) || c.title.toLowerCase().includes(q) || (c.domain || "").toLowerCase().includes(q))
     );
   }, [controls, query, framework, status]);
 
   const selected = controls.find((c) => c.id === selectedId) || null;
 
   const markReviewed = (id) => {
-    setControls((prev) => prev.map((c) => (c.id === id ? { ...c, status: "operational", lastTested: "Just now" } : c)));
+    reviewControl(id).catch(() => {});
+    setSelectedId(null);
   };
 
   const chipCls = (active) =>

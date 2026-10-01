@@ -15,11 +15,17 @@ import GccPage from "./pages/GccPage.jsx";
 import TrustCenterPage from "./pages/TrustCenterPage.jsx";
 import CopilotPanel from "./components/CopilotPanel.jsx";
 import CommandMenu from "./components/CommandMenu.jsx";
+import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
+import { WorkspaceProvider } from "./context/WorkspaceContext.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
+import OnboardingPage from "./pages/OnboardingPage.jsx";
 import { SECTIONS, SETTINGS_SECTION } from "./nav.js";
+import { Loader2 } from "lucide-react";
 
 const THEME_KEY = "dunzo.platform.theme";
 
-export default function PlatformApp() {
+function PlatformShell() {
+  const { logout } = useAuth();
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem(THEME_KEY) || "dark"; } catch { return "dark"; }
   });
@@ -48,6 +54,7 @@ export default function PlatformApp() {
   }, []);
 
   return (
+    <WorkspaceProvider>
     <div className="dz-app min-h-screen bg-p-bg font-sans text-p-ink antialiased" data-theme={theme} data-testid="platform-app">
       <a href="#p-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-full focus:bg-p-ink focus:px-4 focus:py-2 focus:text-p-bg">
         Skip to content
@@ -62,6 +69,7 @@ export default function PlatformApp() {
           onOpenMobile={() => setMobileOpen(true)}
           onOpenMenu={() => setMenuOpen(true)}
           onOpenCopilot={() => setCopilotOpen(true)}
+          onLogout={logout}
         />
         <main id="p-main" className="flex-1">
           <div className="mx-auto w-full max-w-[1200px] px-5 py-8 md:px-8 md:py-10">
@@ -91,5 +99,28 @@ export default function PlatformApp() {
       <CommandMenu open={menuOpen} onClose={() => setMenuOpen(false)} onOpenCopilot={() => setCopilotOpen(true)} />
       <CopilotPanel open={copilotOpen} onClose={() => setCopilotOpen(false)} />
     </div>
+    </WorkspaceProvider>
+  );
+}
+
+function Gate() {
+  const { user, ready } = useAuth();
+  if (!ready || user === null) {
+    return (
+      <div className="dz-app grid min-h-screen place-items-center bg-p-bg" data-theme="dark" data-testid="platform-loading">
+        <Loader2 className="h-6 w-6 animate-spin text-p-violet" />
+      </div>
+    );
+  }
+  if (!user) return <AuthPage />;
+  if (!user.onboarded) return <OnboardingPage />;
+  return <PlatformShell />;
+}
+
+export default function PlatformApp() {
+  return (
+    <AuthProvider>
+      <Gate />
+    </AuthProvider>
   );
 }

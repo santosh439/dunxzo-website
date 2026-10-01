@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Sparkles, Send, Loader2, User } from "lucide-react";
+import { getToken } from "../lib/api.js";
 
 const API = "";
 
@@ -43,9 +44,10 @@ export default function CopilotPanel({ open, onClose }) {
     setMessages((m) => [...m, { role: "user", content: q }, { role: "assistant", content: "" }]);
     setStreaming(true);
     try {
+      const token = getToken();
       const res = await fetch(`${API}/api/copilot/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ session_id: sidRef.current, message: q }),
       });
       const reader = res.body.getReader();

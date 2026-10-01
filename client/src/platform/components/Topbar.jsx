@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
-import { Search, Bell, Sun, Moon, Menu, PanelLeftClose, PanelLeftOpen, ChevronDown, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Search, Bell, Sun, Moon, Menu, PanelLeftClose, PanelLeftOpen, ChevronDown, Sparkles, LogOut } from "lucide-react";
 
-export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollapse, onOpenMobile, onOpenMenu, onOpenCopilot }) {
+export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollapse, onOpenMobile, onOpenMenu, onOpenCopilot, onLogout }) {
   const searchRef = useRef(null);
+  const [userMenu, setUserMenu] = useState(false);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -74,14 +75,31 @@ export default function Topbar({ theme, onToggleTheme, collapsed, onToggleCollap
             <Bell className="h-4 w-4" />
             <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-p-warning" />
           </button>
-          <button
-            data-testid="user-menu-button"
-            aria-label="Account"
-            className="ml-1 grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua"
-            style={{ background: "var(--p-grad)" }}
-          >
-            DU
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setUserMenu((v) => !v)}
+              data-testid="user-menu-button"
+              aria-label="Account"
+              className="ml-1 grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua"
+              style={{ background: "var(--p-grad)" }}
+            >
+              DU
+            </button>
+            {userMenu && (
+              <>
+                <button className="fixed inset-0 z-40 cursor-default" aria-hidden onClick={() => setUserMenu(false)} />
+                <div data-testid="user-menu" className="absolute right-0 top-11 z-50 w-44 overflow-hidden rounded-xl border border-p-edge/10 bg-p-surface p-1.5 shadow-p-pop">
+                  <button
+                    onClick={() => { setUserMenu(false); onLogout?.(); }}
+                    data-testid="logout-button"
+                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-p-mute transition hover:bg-p-ink/5 hover:text-p-ink"
+                  >
+                    <LogOut className="h-4 w-4" />Sign out
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>

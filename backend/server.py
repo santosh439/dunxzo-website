@@ -18,6 +18,9 @@ from fastapi.responses import StreamingResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
 from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
+from fastapi import Request, Depends
+from platform_auth import hash_password, verify_password, create_access_token, current_user_id
+from workspace_seed import seed_controls, seed_risks, compute_pulse, ALL_FRAMEWORKS
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -49,6 +52,8 @@ db = mongo_client[DB_NAME]
 plans_col = db["plans"]
 leads_col = db["leads"]
 copilot_col = db["copilot_messages"]
+users_col = db["users"]
+workspaces_col = db["workspaces"]
 
 EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
 COPILOT_MODEL = ("anthropic", "claude-sonnet-5")
@@ -72,6 +77,8 @@ async def startup_db_indexes():
         await plans_col.create_index("id", unique=True)
         await plans_col.create_index("createdAt")
         await leads_col.create_index("createdAt")
+        await users_col.create_index("email", unique=True)
+        await workspaces_col.create_index("userId", unique=True)
     except Exception as e:
         logger.warning(f"Index creation warning: {e}")
 
@@ -114,6 +121,23 @@ class LeadInput(BaseModel):
 class CopilotInput(BaseModel):
     session_id: str = Field(..., min_length=1, max_length=80)
     message: str = Field(..., min_length=1, max_length=4000)
+
+
+class RegisterInput(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120)
+    email: str = Field(..., min_length=3, max_length=200)
+    password: str = Field(..., min_length=6, max_length=200)
+
+
+class LoginInput(BaseModel):
+    email: str = Field(..., max_length=200)
+    password: str = Field(..., max_length=200)
+
+
+class OnboardingInput(BaseModel):
+    company: str = Field(..., min_length=1, max_length=160)
+    frameworks: List[str] = Field(default_factory=list)
+    size: str = Field("", max_length=40)
 
 
 def generate_plan(input_dict: dict) -> dict:
@@ -287,23 +311,45 @@ async def copilot_history(session_id: str):
 
 
 @app.post("/api/copilot/chat")
-async def copilot_chat(body: CopilotInput):
+async def copilot_chat(body: CopilotInput, request: Request):
     if not EMERGENT_LLM_KEY:
         raise HTTPException(status_code=503, detail="Copilot is not configured")
+
+    # Optional auth: if signed in, ground answers in the user's real workspace.
+    workspace_context = ""
+    try:
+        uid = await current_user_id(request)
+        ws = await _get_workspace(uid)
+        if ws:
+            controls = ws.get("controls", [])
+            risks = ws.get("risks", [])
+            pulse = compute_pulse(controls)
+            prof = ws.get("profile", {})
+            needs = [c for c in controls if c["status"] in ("missing", "attention", "draft")]
+            top_risks = sorted(risks, key=lambda r: r["likelihood"] * r["impact"], reverse=True)[:5]
+            workspace_context = (
+                f"\n\n=== THE USER'S LIVE WORKSPACE (use this to answer specifically) ===\n"
+                f"Company: {prof.get('company')} | Frameworks: {', '.join(prof.get('frameworks', []))} | Size: {prof.get('size')}\n"
+                f"Trust Pulse score: {pulse['score']}/100 "
+                f"({pulse['operational']} operational, {pulse['attention']} need attention, {pulse['missing']} missing evidence, {pulse['draft']} draft, of {pulse['total']} controls).\n"
+                f"Controls needing work: " + "; ".join(f"{c['id']} {c['title']} [{c['status']}]" for c in needs) + "\n"
+                f"Top risks: " + "; ".join(f"{r['id']} {r['title']} (L{r['likelihood']}xI{r['impact']}={r['likelihood']*r['impact']}, {r['status']})" for r in top_risks) + "\n"
+                f"This is the user's actual data — answer with specific control/risk IDs from it.\n"
+            )
+    except HTTPException:
+        pass  # anonymous chat still allowed
 
     now = datetime.now(timezone.utc).isoformat()
     await copilot_col.insert_one({"session_id": body.session_id, "role": "user", "content": body.message, "createdAt": now})
 
-    # Rebuild chat with prior history so the conversation is stateful across requests.
     history = await copilot_col.find({"session_id": body.session_id}, {"_id": 0, "role": 1, "content": 1}).sort("createdAt", 1).to_list(length=200)
 
     chat = LlmChat(
         api_key=EMERGENT_LLM_KEY,
         session_id=body.session_id,
-        system_message=COPILOT_SYSTEM,
+        system_message=COPILOT_SYSTEM + workspace_context,
     ).with_model(*COPILOT_MODEL)
 
-    # Feed prior turns (excluding the just-added user message) as context.
     context = history[:-1]
     context_text = ""
     if context:
@@ -487,6 +533,124 @@ async def submit_lead(body: LeadInput, background_tasks: BackgroundTasks):
     await leads_col.insert_one(record)
     background_tasks.add_task(send_lead_notification, record)
     return {"ok": True, "id": lead_id}
+
+
+# Auth Endpoints
+def public_user(u: dict) -> dict:
+    return {"id": str(u["_id"]), "name": u.get("name", ""), "email": u.get("email", ""), "onboarded": u.get("onboarded", False)}
+
+
+@app.post("/api/auth/register", status_code=status.HTTP_201_CREATED)
+async def register(body: RegisterInput):
+    email = body.email.strip().lower()
+    if "@" not in email:
+        raise HTTPException(status_code=422, detail="Please enter a valid email address")
+    if await users_col.find_one({"email": email}):
+        raise HTTPException(status_code=409, detail="An account with this email already exists")
+    now = datetime.now(timezone.utc).isoformat()
+    doc = {"name": body.name.strip(), "email": email, "password_hash": hash_password(body.password), "onboarded": False, "createdAt": now}
+    res = await users_col.insert_one(doc)
+    uid = str(res.inserted_id)
+    token = create_access_token(uid, email)
+    return {"token": token, "user": {"id": uid, "name": doc["name"], "email": email, "onboarded": False}}
+
+
+@app.post("/api/auth/login")
+async def login(body: LoginInput):
+    email = body.email.strip().lower()
+    u = await users_col.find_one({"email": email})
+    if not u or not verify_password(body.password, u.get("password_hash", "")):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
+    token = create_access_token(str(u["_id"]), email)
+    return {"token": token, "user": public_user(u)}
+
+
+@app.get("/api/auth/me")
+async def me(uid: str = Depends(current_user_id)):
+    from bson import ObjectId
+    u = await users_col.find_one({"_id": ObjectId(uid)})
+    if not u:
+        raise HTTPException(status_code=401, detail="User not found")
+    return {"user": public_user(u)}
+
+
+# Workspace Endpoints
+async def _get_workspace(uid: str):
+    return await workspaces_col.find_one({"userId": uid}, {"_id": 0})
+
+
+def _workspace_view(ws: dict) -> dict:
+    controls = ws.get("controls", [])
+    risks = ws.get("risks", [])
+    for r in risks:
+        r["score"] = r["likelihood"] * r["impact"]
+    return {
+        "profile": ws.get("profile", {}),
+        "controls": controls,
+        "risks": risks,
+        "pulse": compute_pulse(controls),
+    }
+
+
+@app.post("/api/onboarding", status_code=status.HTTP_201_CREATED)
+async def onboarding(body: OnboardingInput, uid: str = Depends(current_user_id)):
+    from bson import ObjectId
+    frameworks = [f for f in body.frameworks if f in ALL_FRAMEWORKS] or ALL_FRAMEWORKS
+    controls = seed_controls(frameworks)
+    control_ids = {c["id"] for c in controls}
+    risks = seed_risks(control_ids)
+    now = datetime.now(timezone.utc).isoformat()
+    ws = {
+        "userId": uid,
+        "profile": {"company": body.company.strip(), "frameworks": frameworks, "size": body.size},
+        "controls": controls,
+        "risks": risks,
+        "createdAt": now,
+    }
+    await workspaces_col.replace_one({"userId": uid}, ws, upsert=True)
+    await users_col.update_one({"_id": ObjectId(uid)}, {"$set": {"onboarded": True}})
+    return _workspace_view(ws)
+
+
+@app.get("/api/workspace")
+async def get_workspace(uid: str = Depends(current_user_id)):
+    ws = await _get_workspace(uid)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not set up yet")
+    return _workspace_view(ws)
+
+
+@app.patch("/api/workspace/controls/{control_id}/review")
+async def review_control(control_id: str, uid: str = Depends(current_user_id)):
+    ws = await _get_workspace(uid)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    found = False
+    for c in ws["controls"]:
+        if c["id"] == control_id:
+            c["status"] = "operational"
+            c["lastTested"] = "Just now"
+            found = True
+    if not found:
+        raise HTTPException(status_code=404, detail="Control not found")
+    await workspaces_col.update_one({"userId": uid}, {"$set": {"controls": ws["controls"]}})
+    return _workspace_view(ws)
+
+
+@app.patch("/api/workspace/risks/{risk_id}/accept")
+async def accept_risk(risk_id: str, uid: str = Depends(current_user_id)):
+    ws = await _get_workspace(uid)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    found = False
+    for r in ws["risks"]:
+        if r["id"] == risk_id:
+            r["status"] = "accepted"
+            found = True
+    if not found:
+        raise HTTPException(status_code=404, detail="Risk not found")
+    await workspaces_col.update_one({"userId": uid}, {"$set": {"risks": ws["risks"]}})
+    return _workspace_view(ws)
 
 
 # Admin Endpoints

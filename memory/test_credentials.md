@@ -1,14 +1,25 @@
-# Test Credentials & Environment Configuration
+# DU-NZO Platform — Test Credentials
 
-## Admin Dashboard Credentials
-- **URL**: `https://c92d4991-7e6a-46a5-906e-ec749b4dce09.preview.emergentagent.com/admin`
-- **ADMIN_TOKEN**: `8c6fc9942fc7f436da7e6b5a20afb7c2a912753da1c754e1`
-- Used for `Authorization: Bearer <ADMIN_TOKEN>` to `/api/admin/leads` and `/api/admin/plans`.
+## Platform (JWT auth, Command 8)
+Auth is self-signup (no admin seeding). Bearer token stored in localStorage key `dunzo.platform.token`.
 
-## Notification Email
-- **Recipient**: `santosh@du-nzo.com`
-- Triggered on submissions to `/api/leads` from Contact, Trust Center, and Launchpad.
+- **Demo account**: `demo@dunzo.com` / `demo12345`
+  - This account may already be onboarded. To test the onboarding wizard, register a NEW account from the /app sign-in screen (toggle "Create one").
+- **Password rule**: min 6 chars.
 
-## MongoDB Connection
-- Local preview: `mongodb://localhost:27017`
-- Database: `dunzo`
+### Auth endpoints (backend FastAPI, /app/backend/server.py)
+- POST `/api/auth/register` {name,email,password} → {token, user}
+- POST `/api/auth/login` {email,password} → {token, user}
+- GET `/api/auth/me` (Bearer) → {user}
+- POST `/api/onboarding` (Bearer) {company, frameworks[], size} → workspace (seeds controls+risks)
+- GET `/api/workspace` (Bearer) → {profile, controls, risks, pulse}
+- PATCH `/api/workspace/controls/{id}/review` (Bearer)
+- PATCH `/api/workspace/risks/{id}/accept` (Bearer)
+- POST `/api/copilot/chat` (Bearer optional — grounds answers in workspace when present)
+
+## Admin (legacy marketing site)
+- `/admin` protected by `ADMIN_TOKEN` env var (see backend/.env).
+
+## Notes
+- Frontend calls use relative `/api` via the Vite proxy to :8001; auth sends `Authorization: Bearer <token>`.
+- The preview runs the FastAPI backend. The canonical Express app (`/app/server`) does NOT yet have the platform auth/workspace/copilot endpoints — needs porting for GitHub production deploy.

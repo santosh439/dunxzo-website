@@ -3,6 +3,9 @@ import { motion } from "framer-motion";
 import { Search, AlertTriangle, Flame, Wrench, Gauge, X } from "lucide-react";
 import { RISKS, RISK_STATUS, BAND, bandOf } from "../data/risk.js";
 import RiskDrawer from "../components/risk/RiskDrawer.jsx";
+import { useWorkspace } from "../context/WorkspaceContext.jsx";
+
+const RISK_BY_ID = Object.fromEntries(RISKS.map((r) => [r.id, r]));
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -13,17 +16,20 @@ export default function RiskPage() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [cell, setCell] = useState(null); // { l, i }
-  const [risks, setRisks] = useState(RISKS);
   const [selectedId, setSelectedId] = useState(null);
+  const { data, acceptRisk } = useWorkspace();
 
   useEffect(() => {
     document.title = "Risk register · DU-NZO Platform";
   }, []);
 
-  const scored = useMemo(
-    () => risks.map((r) => ({ ...r, score: r.likelihood * r.impact, band: bandOf(r.likelihood * r.impact) })),
-    [risks]
-  );
+  const scored = useMemo(() => {
+    const source = data?.risks || [];
+    return source.map((r) => {
+      const merged = { ...(RISK_BY_ID[r.id] || {}), ...r };
+      return { ...merged, score: merged.likelihood * merged.impact, band: bandOf(merged.likelihood * merged.impact) };
+    });
+  }, [data]);
 
   const stats = useMemo(() => {
     const open = scored.filter((r) => r.status === "open").length;
@@ -59,7 +65,7 @@ export default function RiskPage() {
 
   const selected = scored.find((r) => r.id === selectedId) || null;
   const acceptResidual = (id) => {
-    setRisks((prev) => prev.map((r) => (r.id === id ? { ...r, status: "accepted", treatment: "accept" } : r)));
+    acceptRisk(id).catch(() => {});
     setSelectedId(null);
   };
 
