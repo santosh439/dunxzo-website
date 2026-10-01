@@ -1,6 +1,7 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, UploadCloud, CheckCircle2, FileText, AlertTriangle, Pencil } from "lucide-react";
+import { X, UploadCloud, CheckCircle2, FileText, AlertTriangle, Pencil, ChevronRight } from "lucide-react";
 import { CONTROL_STATUS, FRESHNESS, OWNERS, evidenceState } from "../../data/controls.js";
 
 const SEVERITY_DOT = { critical: "bg-p-danger", high: "bg-p-warning", medium: "bg-p-info", low: "bg-p-faint" };
@@ -102,15 +103,22 @@ export default function ControlDrawer({ control, onClose, onMarkReviewed }) {
                   </span>
                 </div>
                 <ul className="mt-2 space-y-2">
-                  {control.evidence.map((e) => (
-                    <li key={e.name} className="flex items-center gap-3 rounded-xl border border-p-edge/10 bg-p-ink/[0.03] px-3 py-2.5">
-                      <FileText className="h-4 w-4 shrink-0 text-p-faint" />
-                      <span className="min-w-0 flex-1 truncate text-sm text-p-ink/90">{e.name}</span>
-                      <span className={`inline-flex items-center gap-1 text-xs ${FRESHNESS[e.freshness].cls}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${FRESHNESS[e.freshness].dot}`} />
-                        {FRESHNESS[e.freshness].label}
-                      </span>
-                      <span className="hidden text-xs text-p-faint sm:inline">{e.updated}</span>
+                  {control.evidence.map((e, i) => (
+                    <li key={e.name}>
+                      <Link
+                        to="/app/evidence"
+                        data-testid={`drawer-evidence-link-${i}`}
+                        className="group flex items-center gap-3 rounded-xl border border-p-edge/10 bg-p-ink/[0.03] px-3 py-2.5 transition hover:border-p-aqua/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua"
+                      >
+                        <FileText className="h-4 w-4 shrink-0 text-p-faint" />
+                        <span className="min-w-0 flex-1 truncate text-sm text-p-ink/90">{e.name}</span>
+                        <span className={`inline-flex items-center gap-1 text-xs ${FRESHNESS[e.freshness].cls}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${FRESHNESS[e.freshness].dot}`} />
+                          {FRESHNESS[e.freshness].label}
+                        </span>
+                        <span className="hidden text-xs text-p-faint sm:inline">{e.updated}</span>
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0 text-p-faint transition-transform duration-150 group-hover:translate-x-0.5" />
+                      </Link>
                     </li>
                   ))}
                   {!control.evidence.length && (
@@ -132,11 +140,18 @@ export default function ControlDrawer({ control, onClose, onMarkReviewed }) {
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-p-faint">Related risks</p>
                 <ul className="mt-2 space-y-2">
-                  {control.risks.map((r) => (
-                    <li key={r.label} className="flex items-center gap-2.5 rounded-xl border border-p-edge/10 bg-p-ink/[0.03] px-3 py-2.5 text-sm text-p-ink/90">
-                      <span className={`h-2 w-2 shrink-0 rounded-full ${SEVERITY_DOT[r.severity]}`} />
-                      {r.label}
-                      <span className="ml-auto text-xs capitalize text-p-faint">{r.severity}</span>
+                  {control.risks.map((r, i) => (
+                    <li key={r.label}>
+                      <Link
+                        to="/app/risk"
+                        data-testid={`drawer-risk-link-${i}`}
+                        className="group flex items-center gap-2.5 rounded-xl border border-p-edge/10 bg-p-ink/[0.03] px-3 py-2.5 text-sm text-p-ink/90 transition hover:border-p-aqua/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua"
+                      >
+                        <span className={`h-2 w-2 shrink-0 rounded-full ${SEVERITY_DOT[r.severity]}`} />
+                        <span className="min-w-0 flex-1 truncate">{r.label}</span>
+                        <span className="text-xs capitalize text-p-faint">{r.severity}</span>
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0 text-p-faint transition-transform duration-150 group-hover:translate-x-0.5" />
+                      </Link>
                     </li>
                   ))}
                 </ul>

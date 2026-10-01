@@ -55,8 +55,15 @@ User decisions (2026-10-01): platform lives under `/app/*` route tree, isolated 
 - `platform/components/controls/ControlDrawer.jsx`: right slide-in drawer (framer-motion, backdrop, Escape, role=dialog): status + description, meta grid (owner/automation/last tested/next review), frameworks chips, evidence list with freshness + dashed Upload evidence button, related risks with severity dots, footer "Mark as reviewed" (gradient) + Edit.
 - Verified: DPDPA filter → 3 rows, search narrows to 1, drawer open/mark-reviewed/Escape close, light theme. `yarn build` clean.
 
+### Command 4 (DONE, 2026-10-01): Monitoring, Evidence, Policies
+- `platform/data/operations.js`: MOCK CHECKS x9 (source/cadence/linked control/status passing|drifting|failing), DRIFT_ALERTS x4 (severity), EVIDENCE_ITEMS x10, EVIDENCE_REQUESTS x3 (collected/total), POLICIES x8 (version/owner/status published|in-review|draft|overdue/attestation%). Registries: CHECK_STATUS, SEVERITY, POLICY_STATUS.
+- `MonitoringPage.jsx`: 4 stat cards; Drift alerts panel (severity dot, control chip, source, detected, Acknowledge → local state dims row + "Acknowledged" chip, open count updates); Check runs list (status icon, name, control chip, source·cadence, last run).
+- `EvidencePage.jsx`: Export audit pack button; stats (items/fresh/stale/open requests); Freshness panel (60% + animated stacked bar + auditor request progress bars); library table (artefact+type/size, control chip, owner, updated, freshness) with search + freshness filter chips. Reuses FRESHNESS registry from controls.js.
+- `PoliciesPage.jsx`: New policy button; 4 clickable status stat filters; table (name+version+owner, status chip, attestation gradient bar, updated, next review red when overdue).
+- Deep links: ControlDrawer evidence rows → /app/evidence, risk rows → /app/risk (`drawer-evidence-link-N`, `drawer-risk-link-N`).
+- Verified: monitoring ack flow (4→3 open), evidence stale filter → 4 rows, policies light theme. Build clean.
+
 ### Remaining Commands (sequential, preview + approval gate after each)
-- C4: Monitoring, Evidence, Policies screens
 - C5: Risk register + Vendors
 - C6: Audit hub, GCC command center, Trust Center screens
 - C7: Copilot panel + command menu (Claude Sonnet 5 via Emergent LLM key — call integration_expert first)

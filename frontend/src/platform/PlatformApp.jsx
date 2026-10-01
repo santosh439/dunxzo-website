@@ -5,6 +5,9 @@ import Topbar from "./components/Topbar.jsx";
 import SectionPage from "./components/SectionPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import ControlsPage from "./pages/ControlsPage.jsx";
+import MonitoringPage from "./pages/MonitoringPage.jsx";
+import EvidencePage from "./pages/EvidencePage.jsx";
+import PoliciesPage from "./pages/PoliciesPage.jsx";
 import { SECTIONS, SETTINGS_SECTION } from "./nav.js";
 
 const THEME_KEY = "dunzo.platform.theme";
@@ -45,7 +48,10 @@ export default function PlatformApp() {
             <Routes>
               <Route path="/app" element={<HomePage />} />
               <Route path="/app/controls" element={<ControlsPage />} />
-              {SECTIONS.slice(2).map((s) => (
+              <Route path="/app/monitoring" element={<MonitoringPage />} />
+              <Route path="/app/evidence" element={<EvidencePage />} />
+              <Route path="/app/policies" element={<PoliciesPage />} />
+              {SECTIONS.slice(5).map((s) => (
                 <Route key={s.slug} path={s.path} element={<SectionPage section={s} />} />
               ))}
               <Route path={SETTINGS_SECTION.path} element={<SectionPage section={SETTINGS_SECTION} />} />
