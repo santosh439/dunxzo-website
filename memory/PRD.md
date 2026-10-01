@@ -70,8 +70,15 @@ User decisions (2026-10-01): platform lives under `/app/*` route tree, isolated 
 - Alert-to-Action: `platform/store.js` — module-level store with `spawnAction/subscribe/getExtraActions`; MonitoringPage acknowledge() spawns an "Investigate drift: …" action (impact by severity, due Today); HomePage merges spawned actions (first) via useSyncExternalStore; NextActions shows a pulsing "new" dot for `fresh` actions. Deduped by id.
 - Verified: heat-cell 3×5 filter → 1 row + clear chip; vendors critical filter → 3 rows; ack alert al-2 → action-row-alert-al-2 on Home with fresh dot. Build clean.
 
+### Command 6 (DONE, 2026-10-01): Audit hub + GCC command center + Trust Center + Risk drawer
+- `platform/data/assurance.js`: MOCK audit (readiness 86%, auditor, window, 5 milestones), 5 auditor requests (collected/total/status), 5 findings (major/minor/observation NC); 4 GCC entities + 15 GCC_DOMAINS with scores; Trust portal stats, 4 certs, 6 docs, 3 access requests + registries.
+- `AuditPage.jsx`: readiness panel (animated %, auditor, milestone checklist), auditor requests (progress bars, Submit → submitted local state), findings list (severity chips, control, status).
+- `GccPage.jsx`: 4 stat cards (avg maturity, 15 domains, headcount, weakest domain); entity switcher (All + 4 entities, offsets domain scores by maturity); 15-domain maturity bars colored by band (green/amber/red).
+- `TrustCenterPage.jsx`: public URL link, stats (published/views/pending/certs), certifications list, documents (public vs NDA), access requests with Approve/Deny → local state.
+- Risk drawer: `platform/data/risk.js` RISKS enriched with description/treatment/plan[]/residual + TREATMENT registry; `components/risk/RiskDrawer.jsx` (inherent→residual score blocks, treatment plan steps, treating-control links → /app/controls, Accept residual → status accepted). RiskPage rows now buttons opening the drawer; `risks` in local state.
+- Verified: risk drawer open/plan/control-link/Escape; audit submit; GCC 15 domains + entity switch (Guadalajara scores shift); trust approve + light theme. Build clean.
+
 ### Remaining Commands (sequential, preview + approval gate after each)
-- C6: Audit hub, GCC command center, Trust Center screens
 - C7: Copilot panel + command menu (Claude Sonnet 5 via Emergent LLM key — call integration_expert first)
 - C8: Real data — JWT auth, Mongo schemas, onboarding wizard (call integration_expert for auth before writing code)
 

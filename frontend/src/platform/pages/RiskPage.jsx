@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Search, AlertTriangle, Flame, Wrench, Gauge, X } from "lucide-react";
 import { RISKS, RISK_STATUS, BAND, bandOf } from "../data/risk.js";
+import RiskDrawer from "../components/risk/RiskDrawer.jsx";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -12,14 +13,16 @@ export default function RiskPage() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [cell, setCell] = useState(null); // { l, i }
+  const [risks, setRisks] = useState(RISKS);
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     document.title = "Risk register · DU-NZO Platform";
   }, []);
 
   const scored = useMemo(
-    () => RISKS.map((r) => ({ ...r, score: r.likelihood * r.impact, band: bandOf(r.likelihood * r.impact) })),
-    []
+    () => risks.map((r) => ({ ...r, score: r.likelihood * r.impact, band: bandOf(r.likelihood * r.impact) })),
+    [risks]
   );
 
   const stats = useMemo(() => {
@@ -53,6 +56,12 @@ export default function RiskPage() {
     `inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua ${
       active ? "border-p-violet/40 bg-p-violet/15 text-p-ink" : "border-p-edge/10 bg-p-ink/5 text-p-mute hover:text-p-ink"
     }`;
+
+  const selected = scored.find((r) => r.id === selectedId) || null;
+  const acceptResidual = (id) => {
+    setRisks((prev) => prev.map((r) => (r.id === id ? { ...r, status: "accepted", treatment: "accept" } : r)));
+    setSelectedId(null);
+  };
 
   const STAT_META = [
     { key: "total", label: "Risks on register", icon: Gauge, cls: "text-p-violet", value: stats.total },
@@ -184,7 +193,8 @@ export default function RiskPage() {
                 const st = RISK_STATUS[r.status];
                 const band = BAND[r.band];
                 return (
-                  <li key={r.id} data-testid={`risk-row-${r.id}`} className="grid grid-cols-12 items-center gap-3 px-5 py-3.5 transition hover:bg-p-ink/[0.04]">
+                  <li key={r.id}>
+                  <button onClick={() => setSelectedId(r.id)} data-testid={`risk-row-${r.id}`} className="grid w-full grid-cols-12 items-center gap-3 px-5 py-3.5 text-left transition hover:bg-p-ink/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-p-aqua">
                     <span className="col-span-4 flex min-w-0 items-center gap-3">
                       <span className="shrink-0 rounded-md border border-p-edge/15 bg-p-ink/5 px-2 py-1 font-mono text-xs font-semibold text-p-mute">{r.id}</span>
                       <span className="min-w-0">
@@ -215,6 +225,7 @@ export default function RiskPage() {
                       <span className="grid h-7 w-7 place-items-center rounded-full border border-p-edge/10 bg-p-violet/10 text-[10px] font-semibold text-p-violet">{r.owner}</span>
                     </span>
                     <span className="col-span-1 text-xs text-p-mute">{r.review}</span>
+                  </button>
                   </li>
                 );
               })}
@@ -225,6 +236,8 @@ export default function RiskPage() {
           </div>
         </motion.section>
       </div>
+
+      <RiskDrawer risk={selected} onClose={() => setSelectedId(null)} onAcceptResidual={acceptResidual} />
     </motion.div>
   );
 }

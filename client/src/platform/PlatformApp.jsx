@@ -10,6 +10,9 @@ import EvidencePage from "./pages/EvidencePage.jsx";
 import PoliciesPage from "./pages/PoliciesPage.jsx";
 import RiskPage from "./pages/RiskPage.jsx";
 import VendorsPage from "./pages/VendorsPage.jsx";
+import AuditPage from "./pages/AuditPage.jsx";
+import GccPage from "./pages/GccPage.jsx";
+import TrustCenterPage from "./pages/TrustCenterPage.jsx";
 import { SECTIONS, SETTINGS_SECTION } from "./nav.js";
 
 const THEME_KEY = "dunzo.platform.theme";
@@ -55,9 +58,9 @@ export default function PlatformApp() {
               <Route path="/app/policies" element={<PoliciesPage />} />
               <Route path="/app/risk" element={<RiskPage />} />
               <Route path="/app/vendors" element={<VendorsPage />} />
-              {SECTIONS.slice(7).map((s) => (
-                <Route key={s.slug} path={s.path} element={<SectionPage section={s} />} />
-              ))}
+              <Route path="/app/audit" element={<AuditPage />} />
+              <Route path="/app/gcc" element={<GccPage />} />
+              <Route path="/app/trust-center" element={<TrustCenterPage />} />
               <Route path={SETTINGS_SECTION.path} element={<SectionPage section={SETTINGS_SECTION} />} />
               <Route path="*" element={<Navigate to="/app" replace />} />
             </Routes>
