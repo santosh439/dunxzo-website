@@ -1,0 +1,750 @@
+{
+  "plans": {
+    "pHML10So": {
+      "id": "pHML10So",
+      "plan": {
+        "version": 1,
+        "generatedAt": "2026-10-01T19:48:32.212Z",
+        "input": {
+          "company": "Acme",
+          "employees": "1-50",
+          "maturity": "none",
+          "hosting": "cloud",
+          "sites": 1,
+          "frameworks": [
+            "iso27001"
+          ],
+          "alignments": [],
+          "startDate": "2026-09-01",
+          "targetDate": null
+        },
+        "summary": {
+          "totalWeeks": 34,
+          "months": 7.8,
+          "startDate": "2026-09-01",
+          "stage2Date": "2027-04-20",
+          "certificationDate": "2027-05-24",
+          "effortDays": 91,
+          "internalDays": 55,
+          "consultantDays": 36,
+          "taskCount": 50
+        },
+        "phases": [
+          {
+            "id": "mobilise",
+            "name": "Mobilise and scope",
+            "group": "Plan",
+            "refs": "Clauses 4, 5",
+            "startWeek": 0,
+            "endWeek": 2,
+            "weeks": 2,
+            "startDate": "2026-09-01",
+            "endDate": "2026-09-14",
+            "effortDays": 5,
+            "tasks": [
+              {
+                "id": "mobilise.m1",
+                "title": "Appoint the ISMS owner and a steering group",
+                "owner": "Leadership",
+                "ref": "5.1, 5.3",
+                "deliverable": "Roles and responsibilities record",
+                "done": false
+              },
+              {
+                "id": "mobilise.m2",
+                "title": "Document internal and external issues",
+                "owner": "ISMS owner",
+                "ref": "4.1",
+                "deliverable": "Context of the organisation",
+                "done": false
+              },
+              {
+                "id": "mobilise.m3",
+                "title": "Identify interested parties and their requirements",
+                "owner": "ISMS owner",
+                "ref": "4.2",
+                "deliverable": "Interested parties register",
+                "done": false
+              },
+              {
+                "id": "mobilise.m4",
+                "title": "Define the ISMS scope and boundaries",
+                "owner": "ISMS owner",
+                "ref": "4.3",
+                "deliverable": "Scope statement",
+                "done": false
+              },
+              {
+                "id": "mobilise.m5",
+                "title": "Shortlist accredited certification bodies and request quotes",
+                "owner": "ISMS owner",
+                "ref": "",
+                "deliverable": "Certification body selected",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "gap",
+            "name": "Gap assessment",
+            "group": "Plan",
+            "refs": "Clauses 4 to 10, Annex A",
+            "startWeek": 2,
+            "endWeek": 4,
+            "weeks": 2,
+            "startDate": "2026-09-15",
+            "endDate": "2026-09-28",
+            "effortDays": 7,
+            "tasks": [
+              {
+                "id": "gap.g1",
+                "title": "Assess the management system clauses 4 to 10",
+                "owner": "Consultant",
+                "ref": "4 to 10",
+                "deliverable": "Clause gap report",
+                "done": false
+              },
+              {
+                "id": "gap.g2",
+                "title": "Assess all 93 Annex A controls",
+                "owner": "Consultant",
+                "ref": "Annex A",
+                "deliverable": "Control gap report",
+                "done": false
+              },
+              {
+                "id": "gap.g3",
+                "title": "Build an information asset inventory",
+                "owner": "IT lead",
+                "ref": "A.5.9",
+                "deliverable": "Asset register",
+                "done": false
+              },
+              {
+                "id": "gap.g4",
+                "title": "Prioritise gaps into a remediation roadmap",
+                "owner": "ISMS owner",
+                "ref": "",
+                "deliverable": "Gap register and roadmap",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "risk",
+            "name": "Risk assessment and treatment",
+            "group": "Plan",
+            "refs": "Clause 6",
+            "startWeek": 4,
+            "endWeek": 7,
+            "weeks": 3,
+            "startDate": "2026-09-29",
+            "endDate": "2026-10-19",
+            "effortDays": 9,
+            "tasks": [
+              {
+                "id": "risk.r1",
+                "title": "Define risk method and acceptance criteria",
+                "owner": "ISMS owner",
+                "ref": "6.1.2",
+                "deliverable": "Risk methodology",
+                "done": false
+              },
+              {
+                "id": "risk.r2",
+                "title": "Identify, analyse and evaluate information security risks",
+                "owner": "Risk owners",
+                "ref": "6.1.2, 8.2",
+                "deliverable": "Risk register",
+                "done": false
+              },
+              {
+                "id": "risk.r3",
+                "title": "Prepare the risk treatment plan",
+                "owner": "ISMS owner",
+                "ref": "6.1.3, 8.3",
+                "deliverable": "Risk treatment plan",
+                "done": false
+              },
+              {
+                "id": "risk.r4",
+                "title": "Produce the Statement of Applicability",
+                "owner": "ISMS owner",
+                "ref": "6.1.3 d",
+                "deliverable": "Statement of Applicability",
+                "done": false
+              },
+              {
+                "id": "risk.r5",
+                "title": "Obtain risk owner approval of residual risk",
+                "owner": "Risk owners",
+                "ref": "6.1.3 f",
+                "deliverable": "Signed approval",
+                "done": false
+              },
+              {
+                "id": "risk.r6",
+                "title": "Set measurable information security objectives",
+                "owner": "Leadership",
+                "ref": "6.2",
+                "deliverable": "Objectives and plan",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "policy",
+            "name": "Policies and documentation",
+            "group": "Build",
+            "refs": "Clauses 5.2, 7.5, Annex A.5",
+            "startWeek": 6,
+            "endWeek": 10,
+            "weeks": 4,
+            "startDate": "2026-10-13",
+            "endDate": "2026-11-09",
+            "effortDays": 11,
+            "tasks": [
+              {
+                "id": "policy.p1",
+                "title": "Approve the information security policy",
+                "owner": "Leadership",
+                "ref": "5.2",
+                "deliverable": "Information security policy",
+                "done": false
+              },
+              {
+                "id": "policy.p2",
+                "title": "Write topic specific policies",
+                "owner": "ISMS owner",
+                "ref": "A.5.1",
+                "deliverable": "Policy set",
+                "done": false
+              },
+              {
+                "id": "policy.p3",
+                "title": "Set up document and record control",
+                "owner": "ISMS owner",
+                "ref": "7.5",
+                "deliverable": "Document control procedure",
+                "done": false
+              },
+              {
+                "id": "policy.p4",
+                "title": "Define incident management procedure",
+                "owner": "Security lead",
+                "ref": "A.5.24 to A.5.28",
+                "deliverable": "Incident procedure",
+                "done": false
+              },
+              {
+                "id": "policy.p5",
+                "title": "Plan information security during disruption",
+                "owner": "IT lead",
+                "ref": "A.5.29, A.5.30",
+                "deliverable": "Continuity plan",
+                "done": false
+              },
+              {
+                "id": "policy.p6",
+                "title": "Define supplier security requirements",
+                "owner": "Procurement",
+                "ref": "A.5.19 to A.5.22",
+                "deliverable": "Supplier policy and register",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "implement",
+            "name": "Control implementation",
+            "group": "Build",
+            "refs": "Clause 8, Annex A",
+            "startWeek": 7,
+            "endWeek": 14,
+            "weeks": 7,
+            "startDate": "2026-10-20",
+            "endDate": "2026-12-07",
+            "effortDays": 27,
+            "tasks": [
+              {
+                "id": "implement.i1",
+                "title": "Enforce access control, MFA and joiner mover leaver process",
+                "owner": "IT lead",
+                "ref": "A.5.15 to A.5.18, A.8.5",
+                "deliverable": "Access control records",
+                "done": false
+              },
+              {
+                "id": "implement.i2",
+                "title": "Harden and baseline system configuration",
+                "owner": "IT lead",
+                "ref": "A.8.9",
+                "deliverable": "Configuration baselines",
+                "done": false
+              },
+              {
+                "id": "implement.i3",
+                "title": "Enable logging and security monitoring",
+                "owner": "Security lead",
+                "ref": "A.8.15, A.8.16",
+                "deliverable": "Logging standard and alerts",
+                "done": false
+              },
+              {
+                "id": "implement.i4",
+                "title": "Implement and test backups",
+                "owner": "IT lead",
+                "ref": "A.8.13",
+                "deliverable": "Backup test records",
+                "done": false
+              },
+              {
+                "id": "implement.i5",
+                "title": "Run vulnerability management",
+                "owner": "Security lead",
+                "ref": "A.8.8",
+                "deliverable": "Scan and patch records",
+                "done": false
+              },
+              {
+                "id": "implement.i6",
+                "title": "Embed secure development practices",
+                "owner": "Engineering",
+                "ref": "A.8.25 to A.8.29",
+                "deliverable": "SDLC standard",
+                "done": false
+              },
+              {
+                "id": "implement.i7",
+                "title": "Apply cryptography standard",
+                "owner": "Engineering",
+                "ref": "A.8.24",
+                "deliverable": "Cryptography standard",
+                "done": false
+              },
+              {
+                "id": "implement.i8",
+                "title": "Screening and security terms in employment",
+                "owner": "HR",
+                "ref": "A.6.1, A.6.2",
+                "deliverable": "HR security records",
+                "done": false
+              },
+              {
+                "id": "implement.i9",
+                "title": "Secure offices and devices, rely on provider for data centres",
+                "owner": "Facilities",
+                "ref": "A.7",
+                "deliverable": "Physical security checklist",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "people",
+            "name": "Awareness and competence",
+            "group": "Build",
+            "refs": "Clause 7",
+            "startWeek": 10,
+            "endWeek": 12,
+            "weeks": 2,
+            "startDate": "2026-11-10",
+            "endDate": "2026-11-23",
+            "effortDays": 5,
+            "tasks": [
+              {
+                "id": "people.a1",
+                "title": "Define required competence for key roles",
+                "owner": "HR",
+                "ref": "7.2",
+                "deliverable": "Competence matrix",
+                "done": false
+              },
+              {
+                "id": "people.a2",
+                "title": "Deliver security awareness training to all staff",
+                "owner": "Security lead",
+                "ref": "7.3, A.6.3",
+                "deliverable": "Training records",
+                "done": false
+              },
+              {
+                "id": "people.a3",
+                "title": "Agree the internal and external communication plan",
+                "owner": "ISMS owner",
+                "ref": "7.4",
+                "deliverable": "Communication plan",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "operate",
+            "name": "Operate and collect evidence",
+            "group": "Run",
+            "refs": "Clauses 8, 9.1",
+            "startWeek": 14,
+            "endWeek": 26,
+            "weeks": 12,
+            "startDate": "2026-12-08",
+            "endDate": "2027-03-01",
+            "effortDays": 11,
+            "tasks": [
+              {
+                "id": "operate.o1",
+                "title": "Operate controls and retain records",
+                "owner": "Control owners",
+                "ref": "8.1",
+                "deliverable": "Operational records",
+                "done": false
+              },
+              {
+                "id": "operate.o2",
+                "title": "Measure and report ISMS performance",
+                "owner": "ISMS owner",
+                "ref": "9.1",
+                "deliverable": "Metrics dashboard",
+                "done": false
+              },
+              {
+                "id": "operate.o3",
+                "title": "Run a quarterly access review",
+                "owner": "IT lead",
+                "ref": "A.5.18",
+                "deliverable": "Access review evidence",
+                "done": false
+              },
+              {
+                "id": "operate.o4",
+                "title": "Run an incident response exercise",
+                "owner": "Security lead",
+                "ref": "A.5.24",
+                "deliverable": "Exercise report",
+                "done": false
+              },
+              {
+                "id": "operate.o5",
+                "title": "Review key suppliers",
+                "owner": "Procurement",
+                "ref": "A.5.22",
+                "deliverable": "Supplier review records",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "internal_audit",
+            "name": "Internal audit",
+            "group": "Run",
+            "refs": "Clause 9.2",
+            "startWeek": 24,
+            "endWeek": 26,
+            "weeks": 2,
+            "startDate": "2027-02-16",
+            "endDate": "2027-03-01",
+            "effortDays": 5,
+            "tasks": [
+              {
+                "id": "internal_audit.ia1",
+                "title": "Plan the internal audit programme",
+                "owner": "ISMS owner",
+                "ref": "9.2.2",
+                "deliverable": "Audit programme",
+                "done": false
+              },
+              {
+                "id": "internal_audit.ia2",
+                "title": "Conduct the audit with an independent auditor",
+                "owner": "Consultant",
+                "ref": "9.2",
+                "deliverable": "Internal audit report",
+                "done": false
+              },
+              {
+                "id": "internal_audit.ia3",
+                "title": "Log nonconformities and observations",
+                "owner": "ISMS owner",
+                "ref": "10.2",
+                "deliverable": "Findings register",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "review",
+            "name": "Management review and corrective action",
+            "group": "Run",
+            "refs": "Clauses 9.3, 10",
+            "startWeek": 26,
+            "endWeek": 28,
+            "weeks": 2,
+            "startDate": "2027-03-02",
+            "endDate": "2027-03-15",
+            "effortDays": 4,
+            "tasks": [
+              {
+                "id": "review.mr1",
+                "title": "Hold the management review",
+                "owner": "Leadership",
+                "ref": "9.3",
+                "deliverable": "Management review minutes",
+                "done": false
+              },
+              {
+                "id": "review.mr2",
+                "title": "Close corrective actions",
+                "owner": "Control owners",
+                "ref": "10.2",
+                "deliverable": "Corrective action evidence",
+                "done": false
+              },
+              {
+                "id": "review.mr3",
+                "title": "Record improvement opportunities",
+                "owner": "ISMS owner",
+                "ref": "10.1",
+                "deliverable": "Improvement log",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "stage1",
+            "name": "Stage 1 audit",
+            "group": "Certify",
+            "refs": "Certification body",
+            "startWeek": 28,
+            "endWeek": 29,
+            "weeks": 1,
+            "startDate": "2027-03-16",
+            "endDate": "2027-03-22",
+            "effortDays": 3,
+            "tasks": [
+              {
+                "id": "stage1.s1a",
+                "title": "Submit ISMS documentation to the certification body",
+                "owner": "ISMS owner",
+                "ref": "",
+                "deliverable": "Document pack",
+                "done": false
+              },
+              {
+                "id": "stage1.s1b",
+                "title": "Stage 1 readiness review by the auditor",
+                "owner": "Certification body",
+                "ref": "",
+                "deliverable": "Stage 1 report",
+                "done": false
+              },
+              {
+                "id": "stage1.s1c",
+                "title": "Resolve Stage 1 areas of concern",
+                "owner": "ISMS owner",
+                "ref": "",
+                "deliverable": "Action evidence",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "stage2",
+            "name": "Stage 2 certification audit",
+            "group": "Certify",
+            "refs": "Certification body",
+            "startWeek": 33,
+            "endWeek": 34,
+            "weeks": 1,
+            "startDate": "2027-04-20",
+            "endDate": "2027-04-26",
+            "effortDays": 4,
+            "tasks": [
+              {
+                "id": "stage2.s2a",
+                "title": "Stage 2 audit of implementation and effectiveness",
+                "owner": "Certification body",
+                "ref": "",
+                "deliverable": "Stage 2 report",
+                "done": false
+              },
+              {
+                "id": "stage2.s2b",
+                "title": "Submit corrective action plans for any findings",
+                "owner": "ISMS owner",
+                "ref": "10.2",
+                "deliverable": "Corrective action plan",
+                "done": false
+              },
+              {
+                "id": "stage2.s2c",
+                "title": "Certification decision and certificate issued",
+                "owner": "Certification body",
+                "ref": "",
+                "deliverable": "ISO/IEC 27001 certificate",
+                "done": false
+              }
+            ]
+          }
+        ],
+        "milestones": [
+          {
+            "id": "kickoff",
+            "name": "Project kickoff",
+            "date": "2026-09-01"
+          },
+          {
+            "id": "soa",
+            "name": "Statement of Applicability approved",
+            "date": "2026-10-19"
+          },
+          {
+            "id": "ia",
+            "name": "Internal audit complete",
+            "date": "2027-03-01"
+          },
+          {
+            "id": "stage1",
+            "name": "Stage 1 audit",
+            "date": "2027-03-16"
+          },
+          {
+            "id": "stage2",
+            "name": "Stage 2 audit",
+            "date": "2027-04-20"
+          },
+          {
+            "id": "cert",
+            "name": "Expected certification",
+            "date": "2027-05-24",
+            "estimate": true
+          },
+          {
+            "id": "surv1",
+            "name": "First surveillance audit",
+            "date": "2028-05-24",
+            "estimate": true
+          },
+          {
+            "id": "surv2",
+            "name": "Second surveillance audit",
+            "date": "2029-05-24",
+            "estimate": true
+          },
+          {
+            "id": "recert",
+            "name": "Recertification audit",
+            "date": "2030-03-24",
+            "estimate": true
+          }
+        ],
+        "risks": [
+          {
+            "level": "medium",
+            "title": "Longer operating period recommended",
+            "detail": "Auditors look for records showing controls have operated over time. Starting from scratch means building that history before Stage 1."
+          }
+        ],
+        "documents": [
+          {
+            "name": "ISMS scope",
+            "ref": "4.3"
+          },
+          {
+            "name": "Information security policy",
+            "ref": "5.2"
+          },
+          {
+            "name": "Risk assessment process",
+            "ref": "6.1.2"
+          },
+          {
+            "name": "Risk treatment process",
+            "ref": "6.1.3"
+          },
+          {
+            "name": "Statement of Applicability",
+            "ref": "6.1.3 d"
+          },
+          {
+            "name": "Information security objectives",
+            "ref": "6.2"
+          },
+          {
+            "name": "Evidence of competence",
+            "ref": "7.2"
+          },
+          {
+            "name": "Documented information required by the ISMS",
+            "ref": "7.5.1 b"
+          },
+          {
+            "name": "Operational planning and control",
+            "ref": "8.1"
+          },
+          {
+            "name": "Risk assessment results",
+            "ref": "8.2"
+          },
+          {
+            "name": "Risk treatment results",
+            "ref": "8.3"
+          },
+          {
+            "name": "Monitoring and measurement results",
+            "ref": "9.1"
+          },
+          {
+            "name": "Internal audit programme and results",
+            "ref": "9.2"
+          },
+          {
+            "name": "Management review results",
+            "ref": "9.3"
+          },
+          {
+            "name": "Nonconformities and corrective actions",
+            "ref": "10.2"
+          }
+        ],
+        "annexA": [
+          {
+            "theme": "Organisational",
+            "clause": "A.5",
+            "controls": 37
+          },
+          {
+            "theme": "People",
+            "clause": "A.6",
+            "controls": 8
+          },
+          {
+            "theme": "Physical",
+            "clause": "A.7",
+            "controls": 14
+          },
+          {
+            "theme": "Technological",
+            "clause": "A.8",
+            "controls": 34
+          }
+        ]
+      },
+      "done": [],
+      "createdAt": "2026-10-01T19:48:32.211Z",
+      "updatedAt": "2026-10-01T19:48:32.211Z"
+    }
+  },
+  "leads": [
+    {
+      "id": "_ipeSYeK",
+      "name": "Test User",
+      "email": "test@example.com",
+      "company": "Acme",
+      "size": "",
+      "frameworks": [],
+      "message": "smoke test",
+      "source": "contact",
+      "summary": "",
+      "createdAt": "2026-10-01T19:48:32.006Z"
+    }
+  ]
+}
