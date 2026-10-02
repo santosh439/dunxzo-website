@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, Header, HTTPException, Response, BackgroundTasks, status
+from fastapi import FastAPI, Header, HTTPException, Response, BackgroundTasks, status, UploadFile, File, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -20,7 +20,13 @@ from pydantic import BaseModel, Field
 from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
 from fastapi import Request, Depends
 from platform_auth import hash_password, verify_password, create_access_token, current_user_id
-from workspace_seed import seed_controls, seed_risks, compute_pulse, ALL_FRAMEWORKS
+from workspace_seed import (
+    seed_controls, seed_risks, compute_pulse, ALL_FRAMEWORKS,
+    seed_evidence, seed_findings, POLICY_TEMPLATES, VENDOR_TEMPLATES,
+    AUDIT_META, AUDITOR_REQUEST_TEMPLATES,
+)
+import uuid
+import object_storage
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -54,6 +60,8 @@ leads_col = db["leads"]
 copilot_col = db["copilot_messages"]
 users_col = db["users"]
 workspaces_col = db["workspaces"]
+files_col = db["evidence_files"]
+invites_col = db["invites"]
 
 EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
 COPILOT_MODEL = ("anthropic", "claude-sonnet-5")
@@ -81,6 +89,11 @@ async def startup_db_indexes():
         await workspaces_col.create_index("userId", unique=True)
     except Exception as e:
         logger.warning(f"Index creation warning: {e}")
+    try:
+        object_storage.init_storage()
+        logger.info("Object storage initialized")
+    except Exception as e:
+        logger.error(f"Object storage init failed: {e}")
 
 
 def new_id() -> str:
@@ -138,6 +151,15 @@ class OnboardingInput(BaseModel):
     company: str = Field(..., min_length=1, max_length=160)
     frameworks: List[str] = Field(default_factory=list)
     size: str = Field("", max_length=40)
+
+
+class InviteInput(BaseModel):
+    email: str = Field(..., max_length=200)
+    role: str = Field("member", max_length=40)
+
+
+class AssignOwnerInput(BaseModel):
+    owner: str = Field(..., min_length=1, max_length=40)
 
 
 def generate_plan(input_dict: dict) -> dict:
@@ -589,6 +611,13 @@ def _workspace_view(ws: dict) -> dict:
         "controls": controls,
         "risks": risks,
         "pulse": compute_pulse(controls),
+        "evidence": ws.get("evidence", []),
+        "policies": ws.get("policies", []),
+        "vendors": ws.get("vendors", []),
+        "audit": ws.get("audit", {}),
+        "auditRequests": ws.get("auditRequests", []),
+        "findings": ws.get("findings", []),
+        "members": ws.get("members", []),
     }
 
 
@@ -605,6 +634,13 @@ async def onboarding(body: OnboardingInput, uid: str = Depends(current_user_id))
         "profile": {"company": body.company.strip(), "frameworks": frameworks, "size": body.size},
         "controls": controls,
         "risks": risks,
+        "evidence": seed_evidence(control_ids),
+        "policies": [dict(p) for p in POLICY_TEMPLATES],
+        "vendors": [dict(v) for v in VENDOR_TEMPLATES],
+        "audit": dict(AUDIT_META),
+        "auditRequests": [dict(a) for a in AUDITOR_REQUEST_TEMPLATES],
+        "findings": seed_findings(control_ids),
+        "members": [],
         "createdAt": now,
     }
     await workspaces_col.replace_one({"userId": uid}, ws, upsert=True)
@@ -651,6 +687,170 @@ async def accept_risk(risk_id: str, uid: str = Depends(current_user_id)):
         raise HTTPException(status_code=404, detail="Risk not found")
     await workspaces_col.update_one({"userId": uid}, {"$set": {"risks": ws["risks"]}})
     return _workspace_view(ws)
+
+
+@app.patch("/api/workspace/audit/requests/{req_id}/submit")
+async def submit_audit_request(req_id: str, uid: str = Depends(current_user_id)):
+    ws = await _get_workspace(uid)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    found = False
+    for r in ws.get("auditRequests", []):
+        if r["id"] == req_id:
+            r["status"] = "submitted"
+            r["collected"] = r["total"]
+            found = True
+    if not found:
+        raise HTTPException(status_code=404, detail="Request not found")
+    await workspaces_col.update_one({"userId": uid}, {"$set": {"auditRequests": ws["auditRequests"]}})
+    return _workspace_view(ws)
+
+
+MAX_EVIDENCE_BYTES = 15 * 1024 * 1024  # 15 MB
+
+
+def _initials(name: str, email: str) -> str:
+    if name and name.strip():
+        parts = name.strip().split()
+        return (parts[0][0] + (parts[1][0] if len(parts) > 1 else "")).upper()
+    return (email[:2]).upper()
+
+
+@app.post("/api/workspace/invites", status_code=status.HTTP_201_CREATED)
+async def create_invite(body: InviteInput, uid: str = Depends(current_user_id)):
+    ws = await _get_workspace(uid)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    email = body.email.strip().lower()
+    if "@" not in email:
+        raise HTTPException(status_code=422, detail="Please enter a valid email address")
+    token = uuid.uuid4().hex
+    now = datetime.now(timezone.utc).isoformat()
+    invite = {
+        "id": str(uuid.uuid4()), "token": token, "ownerUserId": uid,
+        "email": email, "role": body.role, "status": "pending", "createdAt": now,
+    }
+    await invites_col.insert_one(invite)
+    return {"id": invite["id"], "email": email, "role": body.role, "status": "pending", "token": token, "createdAt": now}
+
+
+@app.get("/api/workspace/invites")
+async def list_invites(uid: str = Depends(current_user_id)):
+    cur = invites_col.find({"ownerUserId": uid}, {"_id": 0, "ownerUserId": 0}).sort("createdAt", -1)
+    return await cur.to_list(length=200)
+
+
+@app.get("/api/invites/{token}")
+async def get_invite(token: str):
+    inv = await invites_col.find_one({"token": token}, {"_id": 0, "token": 0, "ownerUserId": 0})
+    if not inv:
+        raise HTTPException(status_code=404, detail="This invite link is invalid or has expired")
+    owner_ws = await workspaces_col.find_one({"userId": (await invites_col.find_one({"token": token}))["ownerUserId"]}, {"_id": 0, "profile": 1})
+    inv["company"] = (owner_ws or {}).get("profile", {}).get("company", "a DU-NZO workspace")
+    return inv
+
+
+@app.post("/api/invites/{token}/accept")
+async def accept_invite(token: str, uid: str = Depends(current_user_id)):
+    inv = await invites_col.find_one({"token": token})
+    if not inv:
+        raise HTTPException(status_code=404, detail="This invite link is invalid or has expired")
+    if inv["status"] == "accepted":
+        raise HTTPException(status_code=409, detail="This invite has already been accepted")
+    from bson import ObjectId
+    u = await users_col.find_one({"_id": ObjectId(uid)})
+    ws = await _get_workspace(inv["ownerUserId"])
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace no longer exists")
+    members = ws.get("members", [])
+    member = {
+        "userId": uid, "name": u.get("name", ""), "email": u.get("email", ""),
+        "role": inv["role"], "initials": _initials(u.get("name", ""), u.get("email", "")),
+        "joinedAt": datetime.now(timezone.utc).isoformat(),
+    }
+    if not any(m["userId"] == uid for m in members):
+        members.append(member)
+        await workspaces_col.update_one({"userId": inv["ownerUserId"]}, {"$set": {"members": members}})
+    await invites_col.update_one({"token": token}, {"$set": {"status": "accepted", "acceptedBy": uid}})
+    return {"ok": True, "company": ws.get("profile", {}).get("company", "")}
+
+
+@app.patch("/api/workspace/controls/{control_id}/owner")
+async def assign_owner(control_id: str, body: AssignOwnerInput, uid: str = Depends(current_user_id)):
+    ws = await _get_workspace(uid)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    found = False
+    for c in ws["controls"]:
+        if c["id"] == control_id:
+            c["owner"] = body.owner.strip()[:4].upper()
+            found = True
+    if not found:
+        raise HTTPException(status_code=404, detail="Control not found")
+    await workspaces_col.update_one({"userId": uid}, {"$set": {"controls": ws["controls"]}})
+    return _workspace_view(ws)
+
+
+@app.post("/api/workspace/evidence", status_code=status.HTTP_201_CREATED)
+async def upload_evidence(file: UploadFile = File(...), control: str = Query("—"), uid: str = Depends(current_user_id)):
+    ws = await _get_workspace(uid)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail="The file is empty")
+    if len(data) > MAX_EVIDENCE_BYTES:
+        raise HTTPException(status_code=413, detail="File exceeds the 15 MB limit")
+
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "bin"
+    path = f"{object_storage.APP_NAME}/uploads/{uid}/{uuid.uuid4()}.{ext}"
+    content_type = file.content_type or object_storage.mime_for(file.filename)
+    try:
+        result = object_storage.put_object(path, data, content_type)
+    except Exception as e:
+        logger.error(f"Evidence upload failed: {e}")
+        raise HTTPException(status_code=502, detail="Upload failed, please try again")
+
+    stored_path = result.get("path", path)
+    now = datetime.now(timezone.utc).isoformat()
+    file_id = str(uuid.uuid4())
+    await files_col.insert_one({
+        "id": file_id, "userId": uid, "storage_path": stored_path,
+        "original_filename": file.filename, "content_type": content_type,
+        "size": len(data), "is_deleted": False, "created_at": now,
+    })
+
+    entry = {
+        "name": file.filename,
+        "control": control or "—",
+        "owner": "You",
+        "type": ext.upper(),
+        "size": object_storage.human_size(len(data)),
+        "updated": datetime.now(timezone.utc).strftime("%b %d, %Y"),
+        "freshness": "fresh",
+        "fileId": file_id,
+    }
+    evidence = ws.get("evidence", [])
+    evidence.insert(0, entry)
+    await workspaces_col.update_one({"userId": uid}, {"$set": {"evidence": evidence}})
+    return _workspace_view(ws | {"evidence": evidence})
+
+
+@app.get("/api/workspace/evidence/{file_id}/download")
+async def download_evidence(file_id: str, uid: str = Depends(current_user_id)):
+    rec = await files_col.find_one({"id": file_id, "userId": uid, "is_deleted": False})
+    if not rec:
+        raise HTTPException(status_code=404, detail="File not found")
+    try:
+        data, content_type = object_storage.get_object(rec["storage_path"])
+    except Exception as e:
+        logger.error(f"Evidence download failed: {e}")
+        raise HTTPException(status_code=502, detail="Download failed")
+    return Response(
+        content=data,
+        media_type=rec.get("content_type", content_type),
+        headers={"Content-Disposition": f'attachment; filename="{rec["original_filename"]}"'},
+    )
 
 
 # Admin Endpoints

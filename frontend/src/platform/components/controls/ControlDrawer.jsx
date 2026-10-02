@@ -15,7 +15,7 @@ function MetaItem({ label, children }) {
   );
 }
 
-export default function ControlDrawer({ control, onClose, onMarkReviewed }) {
+export default function ControlDrawer({ control, onClose, onMarkReviewed, ownerOptions = [], onAssignOwner }) {
   useEffect(() => {
     const esc = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", esc);
@@ -69,12 +69,25 @@ export default function ControlDrawer({ control, onClose, onMarkReviewed }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <MetaItem label="Owner">
-                  <span className="flex items-center gap-2">
-                    <span className="grid h-6 w-6 place-items-center rounded-full border border-p-edge/10 bg-p-violet/10 text-[10px] font-semibold text-p-violet">
+                  <div className="flex items-center gap-2">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-p-edge/10 bg-p-violet/10 text-[10px] font-semibold text-p-violet">
                       {control.owner}
                     </span>
-                    {OWNERS[control.owner] || control.owner}
-                  </span>
+                    {onAssignOwner ? (
+                      <select
+                        value={control.owner}
+                        onChange={(e) => onAssignOwner(control.id, e.target.value)}
+                        data-testid="drawer-assign-owner"
+                        className="flex-1 rounded-lg border border-p-edge/10 bg-p-ink/5 px-2 py-1 text-sm text-p-ink focus:border-p-violet/50 focus:outline-none"
+                      >
+                        {[control.owner, ...ownerOptions.filter((o) => o !== control.owner)].map((o) => (
+                          <option key={o} value={o}>{OWNERS[o] || o}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span>{OWNERS[control.owner] || control.owner}</span>
+                    )}
+                  </div>
                 </MetaItem>
                 <MetaItem label="Automation">{control.automation}</MetaItem>
                 <MetaItem label="Last tested">{control.lastTested}</MetaItem>

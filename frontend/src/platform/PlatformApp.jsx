@@ -19,6 +19,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 import { WorkspaceProvider } from "./context/WorkspaceContext.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
+import JoinPage from "./pages/JoinPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 import { SECTIONS, SETTINGS_SECTION } from "./nav.js";
 import { Loader2 } from "lucide-react";
 
@@ -85,7 +87,8 @@ function PlatformShell() {
               <Route path="/app/audit" element={<AuditPage />} />
               <Route path="/app/gcc" element={<GccPage />} />
               <Route path="/app/trust-center" element={<TrustCenterPage />} />
-              <Route path={SETTINGS_SECTION.path} element={<SectionPage section={SETTINGS_SECTION} />} />
+              <Route path="/app/settings" element={<SettingsPage />} />
+              <Route path="/app/join/:token" element={<JoinPage />} />
               <Route path="*" element={<Navigate to="/app" replace />} />
             </Routes>
           </div>
@@ -106,6 +109,9 @@ function PlatformShell() {
 
 function Gate() {
   const { user, ready } = useAuth();
+  const path = typeof window !== "undefined" ? window.location.pathname : "";
+  const joinMatch = path.match(/^\/app\/join\/([^/]+)/);
+
   if (!ready || user === null) {
     return (
       <div className="dz-app grid min-h-screen place-items-center bg-p-bg" data-theme="dark" data-testid="platform-loading">
@@ -113,7 +119,20 @@ function Gate() {
       </div>
     );
   }
+  // Invite-accept screen is reachable regardless of auth/onboarding state.
+  if (joinMatch) {
+    return (
+      <Routes>
+        <Route path="/app/join/:token" element={<JoinPage />} />
+      </Routes>
+    );
+  }
   if (!user) return <AuthPage />;
+  // After login, honour a pending invite captured before sign-in.
+  try {
+    const pending = localStorage.getItem("dunzo.pendingInvite");
+    if (pending) { window.location.replace(`/app/join/${pending}`); return null; }
+  } catch { /* ignore */ }
   if (!user.onboarded) return <OnboardingPage />;
   return <PlatformShell />;
 }

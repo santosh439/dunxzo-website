@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Plus, Building2, ShieldAlert, FileWarning, FileClock } from "lucide-react";
 import { VENDORS, VENDOR_STATUS, TIER, CERT_STATE } from "../data/risk.js";
+import { useWorkspace } from "../context/WorkspaceContext.jsx";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -9,6 +10,7 @@ const fadeUp = {
 };
 
 export default function VendorsPage() {
+  const { data } = useWorkspace();
   const [query, setQuery] = useState("");
   const [tier, setTier] = useState("All");
 
@@ -16,21 +18,23 @@ export default function VendorsPage() {
     document.title = "Vendors · DU-NZO Platform";
   }, []);
 
+  const vendors = data?.vendors ?? VENDORS;
+
   const stats = useMemo(() => {
     return {
-      total: VENDORS.length,
-      critical: VENDORS.filter((v) => v.tier === "critical").length,
-      expired: VENDORS.filter((v) => v.certState === "expired").length,
-      review: VENDORS.filter((v) => v.status === "review").length,
+      total: vendors.length,
+      critical: vendors.filter((v) => v.tier === "critical").length,
+      expired: vendors.filter((v) => v.certState === "expired").length,
+      review: vendors.filter((v) => v.status === "review").length,
     };
-  }, []);
+  }, [vendors]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return VENDORS.filter(
+    return vendors.filter(
       (v) => (tier === "All" || v.tier === tier) && (!q || v.name.toLowerCase().includes(q) || v.category.toLowerCase().includes(q))
     );
-  }, [query, tier]);
+  }, [vendors, query, tier]);
 
   const chipCls = (active) =>
     `inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua ${

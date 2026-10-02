@@ -96,6 +96,14 @@ User decisions (2026-10-01): platform lives under `/app/*` route tree, isolated 
 
 ## Remaining Commands: NONE — all 8 delivered.
 
+## Post-launch batch (2026-10-02): real data on all screens + uploads + invites + Express port
+- REAL DATA on remaining screens: `workspace_seed.py` now also seeds evidence, policies, vendors, audit meta, auditor requests, findings (framework-filtered). `_workspace_view` returns them. New endpoint PATCH `/workspace/audit/requests/{id}/submit`. Frontend EvidencePage/PoliciesPage/VendorsPage/AuditPage read from WorkspaceContext (mock fallback). Audit submit persists. (Monitoring drift/GCC/Trust remain illustrative mock.)
+- EVIDENCE UPLOADS (Emergent object storage, playbook-followed): `backend/object_storage.py` (lazy env read — init/put/get, stale-key retry). Endpoints POST `/workspace/evidence` (multipart, 15MB cap) + GET `/workspace/evidence/{fileId}/download`. DB `evidence_files` is source of truth (soft-delete ready). Frontend: Upload button + per-file download (blob) on EvidencePage; uploaded rows tagged. Verified round-trip.
+- TEAM INVITES (shareable link, no email): endpoints POST/GET `/workspace/invites`, GET `/invites/{token}`, POST `/invites/{token}/accept`; `members[]` on workspace. PATCH `/workspace/controls/{id}/owner`. Frontend: SettingsPage (`/app/settings`, invite form + copy-link + members), JoinPage (`/app/join/:token`, pre-auth reachable via Gate + pendingInvite handoff), owner dropdown in ControlDrawer. Verified.
+- EXPRESS PORT (`/app/server`, GitHub production target): `src/platform.js` + `objectStorage.js` + `workspaceSeed.js`, mounted in `index.js` (after `await connectDb()`). Full parity: auth(bcryptjs+jsonwebtoken), workspace, invites, evidence (multer+object storage), Copilot via `@anthropic-ai/sdk` streaming SSE. Deps added. Verified on spare port 4999: all flows pass; Copilot 503 without ANTHROPIC_API_KEY.
+  PRODUCTION ENV REQUIRED (host): JWT_SECRET, EMERGENT_LLM_KEY (+INTEGRATION_PROXY_URL), ANTHROPIC_API_KEY (user providing), optional ANTHROPIC_MODEL (default claude-sonnet-4-5-20250929). See test_credentials.md.
+- KNOWN LIMITATION: membership is tracked on the owner's workspace; an invited member who signs in still gets their own workspace (true multi-tenant shared-workspace viewing is future work).
+
 ## Earlier (kept for reference)
 - **Codebase note**: Originally cloned Node monorepo; kept original design/content.
 

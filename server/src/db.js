@@ -13,6 +13,7 @@ if (!DB_NAME) throw new Error("DB_NAME is required");
 
 const client = new MongoClient(MONGO_URL, { maxPoolSize: 20 });
 let plans, leads;
+export const platformCols = {};
 
 export async function connectDb() {
   if (plans) return;
@@ -23,6 +24,15 @@ export async function connectDb() {
   await plans.createIndex({ id: 1 }, { unique: true });
   await plans.createIndex({ createdAt: -1 });
   await leads.createIndex({ createdAt: -1 });
+  // Platform collections (auth, workspace, invites, evidence, copilot)
+  platformCols.users = database.collection("users");
+  platformCols.workspaces = database.collection("workspaces");
+  platformCols.invites = database.collection("invites");
+  platformCols.files = database.collection("evidence_files");
+  platformCols.copilot = database.collection("copilot_messages");
+  await platformCols.users.createIndex({ email: 1 }, { unique: true });
+  await platformCols.workspaces.createIndex({ userId: 1 }, { unique: true });
+  await platformCols.invites.createIndex({ token: 1 }, { unique: true });
 }
 
 const strip = (doc) => {

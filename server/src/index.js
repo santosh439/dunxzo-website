@@ -7,9 +7,10 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { db, connectDb } from "./db.js";
+import { db, connectDb, platformCols } from "./db.js";
 import { notifyLead } from "./email.js";
 import { generatePlan, progressOf } from "../../shared/planEngine.js";
+import { platformRouter } from "./platform.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -148,6 +149,10 @@ app.get("/api/admin/leads", requireAdmin, async (_req, res, next) => {
 app.get("/api/admin/plans", requireAdmin, async (_req, res, next) => {
   try { res.json(await db.listPlans()); } catch (e) { next(e); }
 });
+
+/* DU-NZO Platform API (auth, workspace, invites, evidence, copilot) */
+await connectDb();
+app.use("/api", platformRouter(platformCols));
 
 app.use("/api", (_req, res) => res.status(404).json({ error: "Not found" }));
 

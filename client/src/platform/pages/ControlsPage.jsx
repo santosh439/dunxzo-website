@@ -5,6 +5,7 @@ import ControlsTable from "../components/controls/ControlsTable.jsx";
 import ControlDrawer from "../components/controls/ControlDrawer.jsx";
 import { CONTROLS, CONTROL_STATUS, FRAMEWORK_FILTERS } from "../data/controls.js";
 import { useWorkspace } from "../context/WorkspaceContext.jsx";
+import { apiFetch } from "../lib/api.js";
 
 const CONTROL_BY_ID = Object.fromEntries(CONTROLS.map((c) => [c.id, c]));
 
@@ -21,7 +22,7 @@ const STAT_META = [
 ];
 
 export default function ControlsPage() {
-  const { data, reviewControl } = useWorkspace();
+  const { data, reviewControl, refresh } = useWorkspace();
   const [query, setQuery] = useState("");
   const [framework, setFramework] = useState("All");
   const [status, setStatus] = useState("All");
@@ -59,6 +60,19 @@ export default function ControlsPage() {
   const markReviewed = (id) => {
     reviewControl(id).catch(() => {});
     setSelectedId(null);
+  };
+
+  const ownerOptions = useMemo(() => {
+    const base = ["PK", "AS", "RK", "MT", "You"];
+    const members = (data?.members || []).map((m) => m.initials);
+    return Array.from(new Set([...base, ...members]));
+  }, [data]);
+
+  const assignOwner = async (id, owner) => {
+    try {
+      await apiFetch(`/workspace/controls/${encodeURIComponent(id)}/owner`, { method: "PATCH", body: { owner } });
+      await refresh();
+    } catch { /* ignore */ }
   };
 
   const chipCls = (active) =>
@@ -160,7 +174,7 @@ export default function ControlsPage() {
         )}
       </motion.div>
 
-      <ControlDrawer control={selected} onClose={() => setSelectedId(null)} onMarkReviewed={markReviewed} />
+      <ControlDrawer control={selected} onClose={() => setSelectedId(null)} onMarkReviewed={markReviewed} ownerOptions={ownerOptions} onAssignOwner={assignOwner} />
     </motion.div>
   );
 }

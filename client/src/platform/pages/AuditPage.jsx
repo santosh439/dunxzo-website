@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { CalendarClock, CheckCircle2, Circle, Upload, FileCheck2 } from "lucide-react";
 import { AUDIT, AUDITOR_REQUESTS, FINDINGS, FINDING_SEVERITY, REQUEST_STATUS } from "../data/assurance.js";
+import { useWorkspace } from "../context/WorkspaceContext.jsx";
+import { apiFetch } from "../lib/api.js";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -9,17 +11,21 @@ const fadeUp = {
 };
 
 export default function AuditPage() {
-  const [requests, setRequests] = useState(AUDITOR_REQUESTS);
+  const { data, refresh } = useWorkspace();
 
   useEffect(() => {
     document.title = "Audit hub · DU-NZO Platform";
   }, []);
 
+  const audit = data?.audit && data.audit.framework ? data.audit : AUDIT;
+  const requests = data?.auditRequests ?? AUDITOR_REQUESTS;
+  const findings = data?.findings ?? FINDINGS;
+
   const submittedCount = useMemo(() => requests.filter((r) => r.status === "submitted").length, [requests]);
-  const openFindings = FINDINGS.filter((f) => f.status !== "closed").length;
+  const openFindings = findings.filter((f) => f.status !== "closed").length;
 
   const submit = (id) =>
-    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: "submitted", collected: r.total } : r)));
+    apiFetch(`/workspace/audit/requests/${id}/submit`, { method: "PATCH" }).then(() => refresh()).catch(() => {});
 
   return (
     <motion.div data-testid="platform-page-audit" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.07 } } }} className="space-y-6">
@@ -28,26 +34,26 @@ export default function AuditPage() {
           <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Audit hub</h1>
           <p className="mt-2 max-w-2xl text-[15px] text-p-mute">Your command center for the upcoming audit — readiness, requests and findings.</p>
         </div>
-        <span className="p-chip"><CalendarClock className="h-3.5 w-3.5 text-p-aqua" />{AUDIT.window} · in {AUDIT.daysOut}d</span>
+        <span className="p-chip"><CalendarClock className="h-3.5 w-3.5 text-p-aqua" />{audit.window} · in {audit.daysOut}d</span>
       </motion.header>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <motion.section variants={fadeUp} className="p-panel relative overflow-hidden p-6" data-testid="audit-readiness">
           <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-p-violet/10 blur-3xl" />
-          <p className="text-sm font-medium text-p-mute">{AUDIT.framework}</p>
-          <h2 className="mt-1 text-lg font-semibold tracking-tight">{AUDIT.stage}</h2>
+          <p className="text-sm font-medium text-p-mute">{audit.framework}</p>
+          <h2 className="mt-1 text-lg font-semibold tracking-tight">{audit.stage}</h2>
           <div className="mt-5 flex items-end gap-2">
-            <span className="text-5xl font-semibold tracking-tight p-text-gradient">{AUDIT.readiness}%</span>
+            <span className="text-5xl font-semibold tracking-tight p-text-gradient">{audit.readiness}%</span>
             <span className="pb-1.5 text-sm text-p-faint">ready</span>
           </div>
           <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-p-ink/10">
-            <motion.div className="h-full rounded-full" style={{ background: "var(--p-grad)" }} initial={{ width: 0 }} animate={{ width: `${AUDIT.readiness}%` }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
+            <motion.div className="h-full rounded-full" style={{ background: "var(--p-grad)" }} initial={{ width: 0 }} animate={{ width: `${audit.readiness}%` }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
           </div>
           <p className="mt-4 text-xs text-p-faint">Auditor</p>
-          <p className="text-sm font-medium text-p-ink">{AUDIT.auditor}</p>
+          <p className="text-sm font-medium text-p-ink">{audit.auditor}</p>
 
           <ul className="mt-5 space-y-2.5">
-            {AUDIT.milestones.map((m, i) => (
+            {audit.milestones.map((m, i) => (
               <li key={i} data-testid={`milestone-${i}`} className="flex items-center gap-2.5 text-sm">
                 {m.done ? <CheckCircle2 className="h-4 w-4 shrink-0 text-p-success" /> : <Circle className="h-4 w-4 shrink-0 text-p-faint" />}
                 <span className={m.done ? "text-p-mute line-through" : "text-p-ink"}>{m.label}</span>
@@ -102,7 +108,7 @@ export default function AuditPage() {
           <span className="p-chip">{openFindings} open</span>
         </div>
         <ul className="mt-4 divide-y divide-p-edge/5">
-          {FINDINGS.map((f) => {
+          {findings.map((f) => {
             const sev = FINDING_SEVERITY[f.severity];
             return (
               <li key={f.id} data-testid={`finding-${f.id}`} className="flex items-center gap-3 py-3">

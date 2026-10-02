@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Plus, ChevronRight, BookCheck, BookOpen, FileEdit, AlarmClock } from "lucide-react";
 import { POLICIES, POLICY_STATUS } from "../data/operations.js";
+import { useWorkspace } from "../context/WorkspaceContext.jsx";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -16,6 +17,7 @@ const STAT_META = [
 ];
 
 export default function PoliciesPage() {
+  const { data } = useWorkspace();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
 
@@ -23,18 +25,20 @@ export default function PoliciesPage() {
     document.title = "Policies · DU-NZO Platform";
   }, []);
 
+  const policies = data?.policies ?? POLICIES;
+
   const stats = useMemo(() => {
     const s = { published: 0, "in-review": 0, draft: 0, overdue: 0 };
-    POLICIES.forEach((p) => s[p.status]++);
+    policies.forEach((p) => { if (s[p.status] != null) s[p.status]++; });
     return s;
-  }, []);
+  }, [policies]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return POLICIES.filter(
+    return policies.filter(
       (p) => (status === "All" || p.status === status) && (!q || p.name.toLowerCase().includes(q))
     );
-  }, [query, status]);
+  }, [policies, query, status]);
 
   return (
     <motion.div

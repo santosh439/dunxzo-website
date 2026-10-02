@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Download, FileText, FolderCheck, FileWarning, Inbox } from "lucide-react";
+import { Search, Download, FileText, FolderCheck, FileWarning, Inbox, UploadCloud, Loader2 } from "lucide-react";
 import { EVIDENCE_ITEMS, EVIDENCE_REQUESTS } from "../data/operations.js";
 import { FRESHNESS as FRESHNESS_ITEMS } from "../data/controls.js";
 import { downloadAuditPack } from "../lib/auditPack.js";
+import { useWorkspace } from "../context/WorkspaceContext.jsx";
+import { apiFetch, getToken } from "../lib/api.js";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -11,27 +13,68 @@ const fadeUp = {
 };
 
 export default function EvidencePage() {
+  const { data, refresh } = useWorkspace();
   const [query, setQuery] = useState("");
   const [freshness, setFreshness] = useState("All");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileRef = useRef(null);
+
+  const onUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError("");
+    if (file.size > 15 * 1024 * 1024) { setUploadError("File exceeds the 15 MB limit."); e.target.value = ""; return; }
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch(`/api/workspace/evidence?control=${encodeURIComponent("—")}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: form,
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.detail || "Upload failed"); }
+      await refresh();
+    } catch (err) {
+      setUploadError(err.message || "Upload failed, please try again.");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const downloadEvidence = async (fileId, name) => {
+    const res = await apiFetch(`/workspace/evidence/${fileId}/download`, { raw: true });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   useEffect(() => {
     document.title = "Evidence · DU-NZO Platform";
   }, []);
 
+  const items = data?.evidence ?? EVIDENCE_ITEMS;
+  const requests = data?.auditRequests ?? EVIDENCE_REQUESTS;
+
   const counts = useMemo(() => {
     const c = { fresh: 0, stale: 0 };
-    EVIDENCE_ITEMS.forEach((e) => c[e.freshness]++);
-    return { ...c, total: EVIDENCE_ITEMS.length };
-  }, []);
+    items.forEach((e) => { if (c[e.freshness] != null) c[e.freshness]++; });
+    return { ...c, total: items.length };
+  }, [items]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return EVIDENCE_ITEMS.filter(
+    return items.filter(
       (e) =>
         (freshness === "All" || e.freshness === freshness) &&
         (!q || e.name.toLowerCase().includes(q) || e.control.toLowerCase().includes(q))
     );
-  }, [query, freshness]);
+  }, [items, query, freshness]);
 
   const chipCls = (active) =>
     `inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua ${
@@ -56,15 +99,28 @@ export default function EvidencePage() {
             Every artefact an auditor will ask for — collected, fresh and exportable.
           </p>
         </div>
-        <button
-          onClick={downloadAuditPack}
-          data-testid="export-audit-pack"
+        <div className="flex items-center gap-2">
+          <input ref={fileRef} type="file" onChange={onUpload} className="hidden" data-testid="evidence-file-input" accept=".pdf,.csv,.txt,.json,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx" />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            data-testid="upload-evidence-button"
+            className="inline-flex items-center gap-2 rounded-full border border-p-edge/10 bg-p-ink/5 px-4 py-2.5 text-sm font-semibold text-p-mute transition hover:text-p-ink disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua"
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
+            {uploading ? "Uploading…" : "Upload evidence"}
+          </button>
+          <button
+            onClick={downloadAuditPack}
+            data-testid="export-audit-pack"
           className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-p-aqua"
           style={{ background: "var(--p-grad)" }}
         >
           <Download className="h-4 w-4" />
           Export audit pack
         </button>
+        </div>
+        {uploadError && <p data-testid="upload-error" className="w-full text-right text-sm text-p-danger">{uploadError}</p>}
       </motion.header>
 
       <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -82,7 +138,7 @@ export default function EvidencePage() {
         </div>
         <div data-testid="stat-requests" className="p-panel flex items-center gap-3 p-4">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-p-edge/10 bg-p-ink/5 text-p-info"><Inbox className="h-5 w-5" /></span>
-          <span><span className="block text-2xl font-semibold tracking-tight">{EVIDENCE_REQUESTS.length}</span><span className="block text-xs text-p-faint">Open requests</span></span>
+          <span><span className="block text-2xl font-semibold tracking-tight">{requests.length}</span><span className="block text-xs text-p-faint">Open requests</span></span>
         </div>
       </motion.div>
 
@@ -103,10 +159,10 @@ export default function EvidencePage() {
 
           <h3 className="mt-7 text-sm font-semibold tracking-tight">Auditor requests</h3>
           <ul className="mt-3 space-y-3">
-            {EVIDENCE_REQUESTS.map((r) => (
+            {requests.map((r) => (
               <li key={r.id} data-testid={`request-${r.id}`} className="rounded-xl border border-p-edge/10 bg-p-ink/[0.03] p-3">
                 <p className="text-sm font-medium leading-snug text-p-ink">{r.label}</p>
-                <p className="mt-1 text-xs text-p-faint">{r.requester} · due {r.due}</p>
+                <p className="mt-1 text-xs text-p-faint">{r.requester || "External auditor"} · due {r.due}</p>
                 <div className="mt-2 flex items-center gap-2">
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-p-ink/10">
                     <div className="h-full rounded-full" style={{ width: `${(r.collected / r.total) * 100}%`, background: "var(--p-grad)" }} />
@@ -149,16 +205,25 @@ export default function EvidencePage() {
               <span className="col-span-2">Freshness</span>
             </div>
             <ul className="min-w-[680px] divide-y divide-p-edge/5">
-              {filtered.map((e) => {
+              {filtered.map((e, idx) => {
                 const f = FRESHNESS_ITEMS[e.freshness];
                 return (
-                  <li key={e.name} data-testid={`evidence-row-${e.control}`} className="grid grid-cols-12 items-center gap-3 px-5 py-3.5 transition hover:bg-p-ink/[0.04]">
+                  <li key={e.fileId || `${e.name}-${idx}`} data-testid={`evidence-row-${e.control}`} className="grid grid-cols-12 items-center gap-3 px-5 py-3.5 transition hover:bg-p-ink/[0.04]">
                     <span className="col-span-5 flex min-w-0 items-center gap-3">
                       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-p-edge/10 bg-p-ink/5 text-p-faint">
                         <FileText className="h-4 w-4" />
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium text-p-ink">{e.name}</span>
+                        <span className="flex items-center gap-2">
+                          {e.fileId ? (
+                            <button onClick={() => downloadEvidence(e.fileId, e.name)} data-testid={`evidence-download-${e.fileId}`} className="truncate text-left text-sm font-medium text-p-ink hover:text-p-violet hover:underline">
+                              {e.name}
+                            </button>
+                          ) : (
+                            <span className="block truncate text-sm font-medium text-p-ink">{e.name}</span>
+                          )}
+                          {e.fileId && <span className="shrink-0 rounded border border-p-aqua/25 bg-p-aqua/10 px-1.5 text-[10px] font-semibold text-p-aqua">Uploaded</span>}
+                        </span>
                         <span className="block text-xs text-p-faint">{e.type} · {e.size}</span>
                       </span>
                     </span>
