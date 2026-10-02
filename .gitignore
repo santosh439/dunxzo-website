@@ -50,3 +50,8 @@ server/data/
 
 # Misc
 *.local
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
